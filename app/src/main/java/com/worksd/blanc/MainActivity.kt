@@ -52,8 +52,6 @@ class MainActivity : ComponentActivity() {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-
-        Log.d("DORODORO", " asdasfs")
     }
 }
 
@@ -97,7 +95,6 @@ private fun MainScreen(
             }
         }
     }) { paddingValues ->
-        Log.d("DORODORO", "out recomposition")
         NavHost(
             navController = navController,
             startDestination = "/home",
@@ -105,7 +102,6 @@ private fun MainScreen(
             exitTransition = { ExitTransition.None },
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
-            Log.d("DORODORO", "in recomposition")
             BottomNavigationItem().bottomNavigationItems().forEach { item ->
                 composable(item.url) {
                     BlancWebView(

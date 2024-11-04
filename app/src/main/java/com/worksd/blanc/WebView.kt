@@ -45,8 +45,7 @@ fun BlancWebView(
             webView
         }, update = {
             val url = "http://192.168.0.37:3000/$route"
-            Log.d("DORODORO", "url: $url")
             it.loadUrl(url)
         })
-    Text(text = route)
+
 }
