@@ -60,6 +60,9 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation("androidx.navigation:navigation-compose:2.7.0-rc01")
+    implementation("com.google.dagger:hilt-android:2.52")
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("com.google.code.gson:gson:2.11.0")
 
 
     testImplementation(libs.junit)

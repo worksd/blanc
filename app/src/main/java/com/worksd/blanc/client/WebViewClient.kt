@@ -11,11 +11,9 @@ import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Toast
-import java.util.Date
 
 
-class CustomWebViewClient(val context: Context): WebViewClient(){
+class CustomWebViewClient(val context: Context) : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -38,27 +36,23 @@ class WebAppInterface(private val activity: Activity) {
 
     private val TAG = "WebAppInterface"
 
-    // JavaScript에서 호출할 메서드
-    @JavascriptInterface
-    fun showToast(message: String) {
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show()
-    }
-
     @JavascriptInterface
     fun navigate(screen: String) {
         Log.d(TAG, "navigate: $screen")
+        val intent = Intent(activity, WebViewActivity::class.java)
+        intent.putExtra(EXTRAS_ROUTE, screen)
+        activity.startActivity(intent)
+        activity.finish()
+    }
 
-        if (screen == "main") {
-            val intent = Intent(activity, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            activity.startActivity(intent)
-        } else {
-            val intent = Intent(activity, SchemeWebViewActivity::class.java)
-            intent.putExtras(Bundle().apply {
-                putString(SCHEME_WEB_VIEW_ROUTE, screen)
-            })
-            activity.startActivity(intent)
-            activity.finish()
-        }
+    @JavascriptInterface
+    fun navigateMain(bootInfo: String) {
+        Log.d(TAG, "navigateMain: $bootInfo")
+        val intent = Intent(activity, MainActivity::class.java)
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+        intent.putExtras(Bundle().apply {
+            putString(EXTRAS_BOOT_INFO, bootInfo)
+        })
+        activity.startActivity(intent)
     }
 }

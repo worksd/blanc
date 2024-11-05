@@ -1,141 +1,37 @@
 package com.worksd.blanc
 
-import android.app.Activity
-import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import com.google.gson.Gson
+import com.worksd.blanc.data.BootInfoResponse
+import com.worksd.blanc.ui.MainScreen
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
+    private val webViewInterface = WebAppInterface(this)
+    private val gson = Gson()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val name = intent?.data?.getQueryParameter("name") ?: "undefined"
-        setContent {
-            MainScreen(
-                activity = this
-            )
-        }
 
-    }
+        try {
+            val bootInfo: BootInfoResponse =
+                gson.fromJson(intent.getStringExtra(EXTRAS_BOOT_INFO), BootInfoResponse::class.java)
 
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-    }
-}
+            val bottomMenuList = bootInfo.bottomMenuList
 
-@Composable
-private fun MainScreen(
-    activity: Activity,
-) {
-
-    val navController = rememberNavController()
-    var navigationSelectedItem by remember {
-        mutableStateOf(0)
-    }
-
-    Scaffold(
-        modifier = Modifier.fillMaxSize().background(Color.Black),
-        bottomBar = {
-        NavigationBar {
-            BottomNavigationItem().bottomNavigationItems().forEachIndexed { index, navigationItem ->
-                NavigationBarItem(
-                    selected = index == navigationSelectedItem,
-                    label = {
-                        Text(navigationItem.label)
-                    },
-                    icon = {
-                        Image(
-                            navigationItem.icon,
-                            contentDescription = navigationItem.label
-                        )
-                    },
-                    onClick = {
-                        navigationSelectedItem = index
-                        navController.navigate(navigationItem.url) {
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+            setContent {
+                MainScreen(
+                    activity = this,
+                    bottomMenuList = bottomMenuList,
+                    webViewInterface = webViewInterface,
                 )
             }
+        } catch (e: Exception) {
+            Log.d("MainActivity", "onCreate: $e")
         }
-    }) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = "/home",
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None },
-            modifier = Modifier.padding(paddingValues = paddingValues)
-        ) {
-            BottomNavigationItem().bottomNavigationItems().forEach { item ->
-                composable(item.url) {
-                    BlancWebView(
-                        activity = activity,
-                        route = item.url
-                    )
-                }
-            }
-        }
-    }
-}
-
-data class BottomNavigationItem(
-    val label: String = "",
-    val icon: ImageVector = Icons.Filled.Home,
-    val url: String = ""
-) {
-    fun bottomNavigationItems(): List<BottomNavigationItem> {
-        return listOf(
-            BottomNavigationItem(
-                label = "Home",
-                icon = Icons.Filled.Home,
-                url = "/home"
-            ),
-            BottomNavigationItem(
-                label = "Notification",
-                icon = Icons.Filled.Notifications,
-                url = "/notifications"
-            ),
-            BottomNavigationItem(
-                label = "Setting",
-                icon = Icons.Filled.Settings,
-                url = "/setting"
-            ),
-        )
     }
 }
