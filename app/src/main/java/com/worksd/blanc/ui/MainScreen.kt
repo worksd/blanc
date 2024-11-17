@@ -1,7 +1,5 @@
 package com.worksd.blanc.ui
 
-import android.app.Activity
-import android.graphics.Color.parseColor
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.background
@@ -26,15 +24,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
-import com.worksd.blanc.WebAppInterface
+import com.worksd.blanc.client.CustomWebViewClient
+import com.worksd.blanc.EventReceiver
 import com.worksd.blanc.data.BottomMenuResponse
 
 
 @Composable
 fun MainScreen(
-    activity: Activity,
+    client: CustomWebViewClient,
+    listener: EventReceiver,
     bottomMenuList: List<BottomMenuResponse>,
-    webViewInterface: WebAppInterface,
 ) {
 
     val navController = rememberNavController()
@@ -88,10 +87,10 @@ fun MainScreen(
         ) {
             bottomMenuList.forEach { item ->
                 composable(item.url) {
-                    BlancWebView(
-                        activity = activity,
+                    WebScreen(
+                        webInterface = listener,
                         route = item.url,
-                        webViewInterface = webViewInterface,
+                        client = client,
                     )
                 }
             }

@@ -38,6 +38,7 @@ android {
     }
     buildFeatures {
         compose = true
+        viewBinding = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.1"
@@ -63,6 +64,9 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.52")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.code.gson:gson:2.11.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("com.google.android.material:material:1.10.0")
+    implementation("com.github.bumptech.glide:glide:4.15.1")
 
 
     testImplementation(libs.junit)

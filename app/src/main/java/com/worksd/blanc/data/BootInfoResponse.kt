@@ -5,10 +5,10 @@ import com.google.gson.annotations.SerializedName
 
 @Keep
 data class BootInfoResponse(
-    @SerializedName("minimum_version")
-    val minimumVersion: String,
-    @SerializedName("bottom_menu_list")
-    val bottomMenuList: List<BottomMenuResponse>
+    @SerializedName("bottomMenuList")
+    val bottomMenuList: List<BottomMenuResponse>,
+    @SerializedName("route")
+    val route: String,
 )
 
 @Keep

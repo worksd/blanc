@@ -1,7 +1,10 @@
 package com.worksd.blanc.ui
 
-import android.app.Activity
+import android.annotation.SuppressLint
+import android.util.Log
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
@@ -11,30 +14,40 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.worksd.blanc.CustomWebViewClient
-import com.worksd.blanc.WebAppInterface
+import com.worksd.blanc.client.CustomWebViewClient
+import com.worksd.blanc.EventReceiver
+import com.worksd.blanc.client.WebAppInterface
 
+@SuppressLint("JavascriptInterface", "SetJavaScriptEnabled")
 @Composable
-fun BlancWebView(
-    activity: Activity,
+fun WebScreen(
     route: String,
-    webViewInterface: WebAppInterface,
+    webInterface: EventReceiver,
+    client: CustomWebViewClient,
 ) {
     val context = LocalContext.current
+    val webAppInterface = remember { WebAppInterface(webInterface) }
+
     val webView = remember {
         WebView(context).apply {
-            settings.javaScriptEnabled = true
+
             this.layoutParams = ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
+
             setBackgroundColor(resources.getColor(android.R.color.black, null))
-            this.webViewClient = CustomWebViewClient(context)
+            webViewClient = client
             settings.javaScriptEnabled = true
             settings.allowContentAccess = true
             settings.domStorageEnabled = true
-
-            addJavascriptInterface(webViewInterface, "KloudEvent")
+            addJavascriptInterface(webAppInterface, "KloudEvent")
+            webChromeClient = object : WebChromeClient() {
+                override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                    Log.d("WebAppInterface", "onConsoleMessage: ${consoleMessage?.message()}")
+                    return super.onConsoleMessage(consoleMessage)
+                }
+            }
         }
     }
     AndroidView(
@@ -46,5 +59,4 @@ fun BlancWebView(
             val url = "http://192.168.0.37:3000/$route"
             it.loadUrl(url)
         })
-
 }
