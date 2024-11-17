@@ -24,7 +24,7 @@ fun BottomNavigation(
         bottomMenuList.forEach { item ->
             BottomNavigationItem(
                 modifier = Modifier.weight(1f).clickable {
-                    onClick(item.url)
+                    onClick(item.page.route)
                 },
                 item = item,
             )

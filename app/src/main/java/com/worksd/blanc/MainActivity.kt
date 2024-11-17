@@ -5,8 +5,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
-import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.data.BottomMenuResponse
+import com.worksd.blanc.data.PageInitResponse
 import com.worksd.blanc.databinding.ActivityMainBinding
 import com.worksd.blanc.ui.BottomNavigation
 import com.worksd.blanc.ui.MainViewModel
@@ -26,13 +26,16 @@ class BlancActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        navigate("splash")
+        navigate(page = PageInitResponse(route ="splash", initialColor = "#000000"),)
     }
 
-    private fun addFragment(route: String) {
+    private fun addFragment(page: PageInitResponse) {
         supportFragmentManager.beginTransaction().apply {
-            val fragment = WebViewFragment.newInstance(route)
-            replace(binding.detailFragmentContainer.id, fragment, route)
+            val fragment = WebViewFragment.newInstance(
+                url = getUrl(page.route),
+                initialColor = page.initialColor,
+            )
+            replace(binding.detailFragmentContainer.id, fragment, page.route)
             show(fragment)
             commit()
         }
@@ -43,10 +46,13 @@ class BlancActivity : AppCompatActivity() {
     ) {
         lifecycleScope.launch {
             bottomMenuList.forEach {
-                val fragment = WebViewFragment.newInstance(route = it.url)
+                val fragment = WebViewFragment.newInstance(
+                    url = getUrl(it.page.route),
+                    initialColor = it.page.initialColor,
+                )
                 supportFragmentManager
                     .beginTransaction()
-                    .add(binding.fragmentContainer.id, fragment, it.url)
+                    .add(binding.fragmentContainer.id, fragment, it.page.route)
                     .commit()
             }
         }
@@ -69,25 +75,27 @@ class BlancActivity : AppCompatActivity() {
         }
     }
 
-    private fun navigate(route: String, withClear: Boolean = false) {
+    private fun navigate(page: PageInitResponse, withClear: Boolean = false) {
         if (withClear) { supportFragmentManager.fragments.forEach {
             supportFragmentManager.beginTransaction().remove(it).commit()
             supportFragmentManager.popBackStack(it.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
         }
-        if (route == "main") {
+        if (page.route == "main") {
             addMainFragment(bottomMenuList)
         }
         else {
-            addFragment(route)
+            addFragment(
+                page = page,
+            )
         }
 
         lifecycleScope.launch {
-            if (route == "splash") {
+            if (page.route == "splash") {
                 delay(2000L)
-                navigate("login", true)
+                navigate(page = PageInitResponse(route ="login", initialColor = "#000000"), true)
                 delay(2000L)
-                navigate("main", true)
+                navigate(page = PageInitResponse(route ="main", initialColor = "#000000"), true)
             }
         }
     }
@@ -99,7 +107,7 @@ class BlancActivity : AppCompatActivity() {
             labelColor = "#000000",
             iconUrl = "",
             iconSize = 24,
-            url = "home"
+            page = PageInitResponse(route ="home", initialColor = "#000000"),
         ),
         BottomMenuResponse(
             label = "프로필",
@@ -107,7 +115,7 @@ class BlancActivity : AppCompatActivity() {
             labelColor = "#000000",
             iconUrl = "",
             iconSize = 24,
-            url = "profile"
+            page = PageInitResponse(route ="profile", initialColor = "#000000"),
         ),
         BottomMenuResponse(
             label = "알림",
@@ -115,7 +123,11 @@ class BlancActivity : AppCompatActivity() {
             labelColor = "#000000",
             iconUrl = "",
             iconSize = 24,
-            url = "notifications"
+            page = PageInitResponse(route ="notifications", initialColor = "#000000"),
         )
     )
+
+    private fun getUrl(route: String): String {
+        return "http://192.168.0.94:3000/$route"
+    }
 }

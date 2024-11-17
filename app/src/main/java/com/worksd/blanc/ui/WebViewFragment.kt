@@ -1,17 +1,16 @@
 package com.worksd.blanc.ui
 
 import android.annotation.SuppressLint
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.worksd.blanc.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.databinding.FragmentWebViewBinding
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 class WebViewFragment : Fragment() {
 
@@ -29,42 +28,56 @@ class WebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        initWebView()
+        initWebView(
+            url = requireArguments().getString(ARG_URL).orEmpty(),
+            initialColor = requireArguments().getString(ARG_INITIAL_COLOR).orEmpty()
+        )
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun initWebView() {
-        binding.apply {
-            webView.apply {
-                settings.apply {
-                    javaScriptEnabled = true
-                    setSupportZoom(true)
-                    builtInZoomControls = true
-                    displayZoomControls = false
-                    allowContentAccess = true
-                    domStorageEnabled = true
-                    webViewClient = CustomWebViewClient(context, object: WebViewListener {
-                        override fun onConnectSuccess() {
-                        }
+    private fun initWebView(
+        url: String, initialColor: String
+    ) {
+        try {
+            binding.apply {
+                webView.apply {
+                    settings.apply {
+                        javaScriptEnabled = true
+                        setSupportZoom(true)
+                        builtInZoomControls = true
+                        displayZoomControls = false
+                        allowContentAccess = true
+                        domStorageEnabled = true
+                        setBackgroundColor(Color.parseColor(initialColor))
+                        webViewClient = CustomWebViewClient(context, object : WebViewListener {
+                            override fun onConnectSuccess() {
+                            }
 
-                        override fun onConnectFail() {
-                        }
+                            override fun onConnectFail() {
+                            }
 
-                        override fun onSplashPageStarted() {
-                        }
-                    })
+                            override fun onSplashPageStarted() {
+                            }
+                        })
+                    }
+                    loadUrl(url)
                 }
-                loadUrl("http://192.168.0.94:3000/${arguments?.getString("route")}")
             }
+        } catch (e: Exception) {
+            Log.d("WebAppInterface", "initWebView: $e")
         }
     }
 
     companion object {
+        private const val ARG_URL = "ARG_URL"
+        private const val ARG_INITIAL_COLOR = "ARG_INITIAL_COLOR"
         fun newInstance(
-            route: String,
+            url: String,
+            initialColor: String,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
-                putString("route", route)
+                putString(ARG_URL, url)
+                putString(ARG_INITIAL_COLOR, initialColor)
             }
         }
     }

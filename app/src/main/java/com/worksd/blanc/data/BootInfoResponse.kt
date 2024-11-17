@@ -23,6 +23,14 @@ data class BottomMenuResponse(
     val iconUrl: String,
     @SerializedName("icon_size")
     val iconSize: Int,
-    @SerializedName("url")
-    val url: String,
+    @SerializedName("page")
+    val page: PageInitResponse,
+)
+
+@Keep
+data class PageInitResponse(
+    @SerializedName("route")
+    val route: String,
+    @SerializedName("initialColor")
+    val initialColor: String
 )
