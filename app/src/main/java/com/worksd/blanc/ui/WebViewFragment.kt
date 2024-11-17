@@ -6,9 +6,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.worksd.blanc.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.databinding.FragmentWebViewBinding
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class WebViewFragment : Fragment() {
 
@@ -51,7 +54,7 @@ class WebViewFragment : Fragment() {
                         }
                     })
                 }
-                loadUrl("http://192.168.0.37:3000/${arguments?.getString("route")}")
+                loadUrl("http://192.168.0.94:3000/${arguments?.getString("route")}")
             }
         }
     }

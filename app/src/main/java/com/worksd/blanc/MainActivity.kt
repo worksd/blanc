@@ -1,27 +1,18 @@
 package com.worksd.blanc
 
-import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.forEachIndexed
+import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.CustomTarget
-import com.bumptech.glide.request.transition.Transition
-import com.google.gson.Gson
-import com.worksd.blanc.data.BootInfoResponse
+import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.data.BottomMenuResponse
 import com.worksd.blanc.databinding.ActivityMainBinding
-import com.worksd.blanc.ui.BlancScreen
 import com.worksd.blanc.ui.BottomNavigation
-import com.worksd.blanc.ui.MainScreen
 import com.worksd.blanc.ui.MainViewModel
 import com.worksd.blanc.ui.WebViewFragment
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -35,39 +26,23 @@ class BlancActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        initView()
+        navigate("splash")
     }
 
-    private fun initView() {
-        val bottomMenuList = listOf(
-            BottomMenuResponse(
-                label = "홈",
-                labelSize = 12,
-                labelColor = "#000000",
-                iconUrl = "",
-                iconSize = 24,
-                url = "home"
-            ),
-            BottomMenuResponse(
-                label = "프로필",
-                labelSize = 12,
-                labelColor = "#000000",
-                iconUrl = "",
-                iconSize = 24,
-                url = "profile"
-            ),
-            BottomMenuResponse(
-                label = "알림",
-                labelSize = 12,
-                labelColor = "#000000",
-                iconUrl = "",
-                iconSize = 24,
-                url = "notifications"
-            )
-        )
+    private fun addFragment(route: String) {
+        supportFragmentManager.beginTransaction().apply {
+            val fragment = WebViewFragment.newInstance(route)
+            replace(binding.detailFragmentContainer.id, fragment, route)
+            show(fragment)
+            commit()
+        }
+    }
 
+    private fun addMainFragment(
+        bottomMenuList: List<BottomMenuResponse>
+    ) {
         lifecycleScope.launch {
-            bottomMenuList.reversed().forEach {
+            bottomMenuList.forEach {
                 val fragment = WebViewFragment.newInstance(route = it.url)
                 supportFragmentManager
                     .beginTransaction()
@@ -76,29 +51,13 @@ class BlancActivity : AppCompatActivity() {
             }
         }
 
-
-
         binding.bottomNavigation.setContent {
             BottomNavigation(
                 bottomMenuList = bottomMenuList,
                 onClick = { route ->
                     showFragment(route)
-                    if (route == "notifications") {
-                        addSplashFragment()
-                    }
                 }
             )
-        }
-
-    }
-
-    private fun addSplashFragment() {
-        supportFragmentManager.beginTransaction().apply {
-            val fragment = WebViewFragment.newInstance("splash")
-            add(binding.detailFragmentContainer.id, fragment, "splash")
-            addToBackStack(null)
-            show(fragment)
-            commit()
         }
     }
 
@@ -110,4 +69,53 @@ class BlancActivity : AppCompatActivity() {
         }
     }
 
+    private fun navigate(route: String, withClear: Boolean = false) {
+        if (withClear) { supportFragmentManager.fragments.forEach {
+            supportFragmentManager.beginTransaction().remove(it).commit()
+            supportFragmentManager.popBackStack(it.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+            }
+        }
+        if (route == "main") {
+            addMainFragment(bottomMenuList)
+        }
+        else {
+            addFragment(route)
+        }
+
+        lifecycleScope.launch {
+            if (route == "splash") {
+                delay(2000L)
+                navigate("login", true)
+                delay(2000L)
+                navigate("main", true)
+            }
+        }
+    }
+
+    private val bottomMenuList = listOf(
+        BottomMenuResponse(
+            label = "홈",
+            labelSize = 12,
+            labelColor = "#000000",
+            iconUrl = "",
+            iconSize = 24,
+            url = "home"
+        ),
+        BottomMenuResponse(
+            label = "프로필",
+            labelSize = 12,
+            labelColor = "#000000",
+            iconUrl = "",
+            iconSize = 24,
+            url = "profile"
+        ),
+        BottomMenuResponse(
+            label = "알림",
+            labelSize = 12,
+            labelColor = "#000000",
+            iconUrl = "",
+            iconSize = 24,
+            url = "notifications"
+        )
+    )
 }
