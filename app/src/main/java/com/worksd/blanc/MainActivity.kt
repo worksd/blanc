@@ -26,7 +26,7 @@ class BlancActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        navigate(page = PageInitResponse(route ="splash", initialColor = "#000000"),)
+        navigate(page = PageInitResponse(route ="splash", initialColor = "#000000"))
     }
 
     private fun addFragment(page: PageInitResponse) {
@@ -34,6 +34,10 @@ class BlancActivity : AppCompatActivity() {
             val fragment = WebViewFragment.newInstance(
                 url = getUrl(page.route),
                 initialColor = page.initialColor,
+            )
+            setCustomAnimations(
+                R.anim.anim_slide_in,
+                R.anim.anim_fade_out,
             )
             replace(binding.detailFragmentContainer.id, fragment, page.route)
             show(fragment)
@@ -68,34 +72,36 @@ class BlancActivity : AppCompatActivity() {
     }
 
     private fun showFragment(route: String) {
-        supportFragmentManager.beginTransaction().apply {
-            supportFragmentManager.fragments.forEach { hide(it) }
-            supportFragmentManager.findFragmentByTag(route)?.let { show(it) }
-            commit()
-        }
+        val transaction = supportFragmentManager.beginTransaction()
+            supportFragmentManager.fragments.forEach { transaction.hide(it) }
+            supportFragmentManager.findFragmentByTag(route)?.let { transaction.show(it) }
+            transaction.commit()
     }
 
-    private fun navigate(page: PageInitResponse, withClear: Boolean = false) {
-        if (withClear) { supportFragmentManager.fragments.forEach {
+    private fun launchFragment(page: PageInitResponse) {
+        supportFragmentManager.fragments.forEach {
             supportFragmentManager.beginTransaction().remove(it).commit()
-            supportFragmentManager.popBackStack(it.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-            }
-        }
-        if (page.route == "main") {
-            addMainFragment(bottomMenuList)
-        }
-        else {
-            addFragment(
-                page = page,
+            supportFragmentManager.popBackStack(
+                it.tag,
+                FragmentManager.POP_BACK_STACK_INCLUSIVE
             )
         }
+        addFragment(page)
+    }
+
+    private fun navigate(page: PageInitResponse) {
+
+        addFragment(
+            page = page,
+        )
+
 
         lifecycleScope.launch {
             if (page.route == "splash") {
                 delay(2000L)
-                navigate(page = PageInitResponse(route ="login", initialColor = "#000000"), true)
+                launchFragment(page = PageInitResponse(route ="login", initialColor = "#000000"))
                 delay(2000L)
-                navigate(page = PageInitResponse(route ="main", initialColor = "#000000"), true)
+                addMainFragment(bottomMenuList)
             }
         }
     }

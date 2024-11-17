@@ -40,11 +40,12 @@ class WebViewFragment : Fragment() {
     ) {
         try {
             binding.apply {
+                root.setBackgroundColor(Color.parseColor(initialColor))
                 webView.apply {
                     settings.apply {
                         javaScriptEnabled = true
-                        setSupportZoom(true)
-                        builtInZoomControls = true
+                        setSupportZoom(false)
+                        builtInZoomControls = false
                         displayZoomControls = false
                         allowContentAccess = true
                         domStorageEnabled = true

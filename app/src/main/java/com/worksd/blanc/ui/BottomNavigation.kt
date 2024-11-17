@@ -1,8 +1,10 @@
 package com.worksd.blanc.ui
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
@@ -37,18 +39,22 @@ fun BottomNavigationItem(
     modifier: Modifier = Modifier,
     item: BottomMenuResponse,
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    Box(
+        modifier = Modifier.fillMaxHeight(),
+        contentAlignment = Alignment.Center,
     ) {
-        AsyncImage(
-            model = item.iconUrl,
-            contentDescription = null,
-            modifier = Modifier.size(item.iconSize.dp),
-        )
-        Text(
-            text = item.label,
-        )
-
+        Column(
+            modifier = modifier,
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            AsyncImage(
+                model = item.iconUrl,
+                contentDescription = null,
+                modifier = Modifier.size(item.iconSize.dp),
+            )
+            Text(
+                text = item.label,
+            )
+        }
     }
 }
