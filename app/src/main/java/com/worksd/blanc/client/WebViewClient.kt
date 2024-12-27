@@ -51,13 +51,23 @@ class WebAppInterface(val receiver: EventReceiver) {
     private val TAG = "WebAppInterface"
 
     @JavascriptInterface
-    fun navigate(screen: String) {
-//        Log.d(TAG, "navigate: $screen")
-//        val intent = Intent(activity, WebViewActivity::class.java)
-//        intent.putExtra(EXTRAS_ROUTE, screen)
-//        activity.startActivity(intent)
-//        activity.finish()
-        receiver.navigate(screen)
+    fun replace(screen: String) {
+        receiver.replace(screen)
+    }
+
+    @JavascriptInterface
+    fun push(screen: String) {
+        receiver.push(screen)
+    }
+
+    @JavascriptInterface
+    fun back() {
+        receiver.back()
+    }
+
+    @JavascriptInterface
+    fun clearAndPush(screen: String) {
+        receiver.pushAndAllClear(screen)
     }
 
     @JavascriptInterface

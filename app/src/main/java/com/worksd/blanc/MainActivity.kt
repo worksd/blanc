@@ -1,6 +1,7 @@
 package com.worksd.blanc
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.FragmentManager
@@ -26,7 +27,74 @@ class BlancActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        navigate(page = PageInitResponse(route ="splash", initialColor = "#000000"))
+        navigate(page = PageInitResponse(route ="/splash", initialColor = "#000000"))
+
+        collectReplace()
+        collectPush()
+        collectClearAndPush()
+        collectBack()
+    }
+
+    private fun collectReplace() {
+        lifecycleScope.launch {
+            viewModel.replace.collect {
+                addFragment(
+                    page = PageInitResponse(
+                        route = it,
+                        initialColor = "#FFFFFF"
+                    )
+                )
+            }
+        }
+    }
+
+    private fun collectPush() {
+        lifecycleScope.launch {
+            viewModel.push.collect {
+                val page = PageInitResponse(
+                    route = it,
+                    initialColor = "#FFFFFF"
+                )
+                Log.d("webAppInterface", "good!")
+                supportFragmentManager.beginTransaction().apply {
+                    val fragment = WebViewFragment.newInstance(
+                        url = getUrl(page.route),
+                        initialColor = page.initialColor,
+                    )
+                    add(binding.detailFragmentContainer.id, fragment, page.route)
+                    addToBackStack(it)
+                    show(fragment)
+                    commit()
+                }
+            }
+        }
+    }
+
+    private fun collectClearAndPush() {
+        lifecycleScope.launch {
+            viewModel.clearAndPush.collect {
+                if (it == viewModel.mainRoute.value) {
+                    addMainFragment(
+                        bottomMenuList = viewModel.bottomMenuList.value,
+                    )
+                } else {
+                    launchFragment(
+                        PageInitResponse(
+                            route = it,
+                            initialColor = "#FFFFFF"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun collectBack() {
+        lifecycleScope.launch {
+            viewModel.back.collect {
+                onBackPressedDispatcher.onBackPressed()
+            }
+        }
     }
 
     private fun addFragment(page: PageInitResponse) {
@@ -34,10 +102,6 @@ class BlancActivity : AppCompatActivity() {
             val fragment = WebViewFragment.newInstance(
                 url = getUrl(page.route),
                 initialColor = page.initialColor,
-            )
-            setCustomAnimations(
-                R.anim.anim_slide_in,
-                R.anim.anim_fade_out,
             )
             replace(binding.detailFragmentContainer.id, fragment, page.route)
             show(fragment)
@@ -49,15 +113,29 @@ class BlancActivity : AppCompatActivity() {
         bottomMenuList: List<BottomMenuResponse>
     ) {
         lifecycleScope.launch {
+            supportFragmentManager.beginTransaction().apply {
+                supportFragmentManager.fragments.forEach {
+                    remove(it)
+                }
+                commit()
+
+                supportFragmentManager.fragments.forEach {
+                    supportFragmentManager.popBackStack(it.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                }
+            }
+
             bottomMenuList.forEach {
                 val fragment = WebViewFragment.newInstance(
                     url = getUrl(it.page.route),
                     initialColor = it.page.initialColor,
                 )
-                supportFragmentManager
-                    .beginTransaction()
-                    .add(binding.fragmentContainer.id, fragment, it.page.route)
-                    .commit()
+                supportFragmentManager.beginTransaction().apply {
+                    add(binding.fragmentContainer.id, fragment, it.page.route)
+                    hide(fragment)
+                    commit()
+                }
+                delay(100L) // TODO: 하드코딩 수정
+                showFragment(bottomMenuList.first().page.route)
             }
         }
 
@@ -94,16 +172,6 @@ class BlancActivity : AppCompatActivity() {
         addFragment(
             page = page,
         )
-
-
-        lifecycleScope.launch {
-            if (page.route == "splash") {
-                delay(2000L)
-                launchFragment(page = PageInitResponse(route ="login", initialColor = "#000000"))
-                delay(2000L)
-                addMainFragment(bottomMenuList)
-            }
-        }
     }
 
     private val bottomMenuList = listOf(
@@ -134,6 +202,6 @@ class BlancActivity : AppCompatActivity() {
     )
 
     private fun getUrl(route: String): String {
-        return "http://192.168.0.94:3000/$route"
+        return "http://192.168.45.33:3000$route"
     }
 }

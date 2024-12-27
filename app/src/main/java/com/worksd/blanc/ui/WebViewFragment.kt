@@ -8,11 +8,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
+import com.worksd.blanc.EventReceiver
 import com.worksd.blanc.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
+import com.worksd.blanc.client.WebAppInterface
 import com.worksd.blanc.databinding.FragmentWebViewBinding
+import dagger.hilt.android.AndroidEntryPoint
+import com.worksd.blanc.utils.PrefKeys.Session.FILE_NAME
+import com.worksd.blanc.utils.PrefKeys.Session.KEY_TOKEN
+import com.worksd.blanc.utils.PrefUtils
 
+@AndroidEntryPoint
 class WebViewFragment : Fragment() {
+
+    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var binding: FragmentWebViewBinding
 
@@ -49,19 +59,50 @@ class WebViewFragment : Fragment() {
                         displayZoomControls = false
                         allowContentAccess = true
                         domStorageEnabled = true
+                        val customWebViewClient =
+                            CustomWebViewClient(context, object : WebViewListener {
+                                override fun onConnectSuccess() {
+
+                                }
+
+                                override fun onConnectFail() {
+                                }
+
+                                override fun onSplashPageStarted() {
+                                }
+                            })
+                        addJavascriptInterface(WebAppInterface(object :EventReceiver {
+                            override fun fetchBootInfo(bootInfo: String) {
+                                viewModel.setBootInfo(bootInfo)
+                            }
+
+                            override fun replace(route: String) {
+                                Log.d("WebAppInterface", "replace = $route")
+                                viewModel.navigate(route)
+                            }
+
+                            override fun push(route: String) {
+                                Log.d("WebAppInterface", "push = $route")
+                                viewModel.push(route)
+                            }
+
+                            override fun pushAndAllClear(route: String) {
+                                Log.d("WebAppInterface", "clear And Push = $route")
+                                viewModel.clearAndPush(route)
+                            }
+
+                            override fun back() {
+                                viewModel.back()
+                            }
+
+                            override fun setToken(token: String) {
+                                PrefUtils(context).setString(FILE_NAME, KEY_TOKEN, token)
+                            }
+                        }), "KloudEvent")
                         setBackgroundColor(Color.parseColor(initialColor))
-                        webViewClient = CustomWebViewClient(context, object : WebViewListener {
-                            override fun onConnectSuccess() {
-                            }
-
-                            override fun onConnectFail() {
-                            }
-
-                            override fun onSplashPageStarted() {
-                            }
-                        })
+                        webViewClient = customWebViewClient
+                        loadUrl(url, mutableMapOf("Cookie" to "accessToken=${PrefUtils(context).getString(FILE_NAME, KEY_TOKEN)}"))
                     }
-                    loadUrl(url)
                 }
             }
         } catch (e: Exception) {

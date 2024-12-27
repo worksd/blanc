@@ -40,7 +40,7 @@ fun BottomNavigationItem(
     item: BottomMenuResponse,
 ) {
     Box(
-        modifier = Modifier.fillMaxHeight(),
+        modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
         Column(

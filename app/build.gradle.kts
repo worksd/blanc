@@ -67,6 +67,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("com.google.android.material:material:1.10.0")
     implementation("com.github.bumptech.glide:glide:4.15.1")
+    implementation("androidx.fragment:fragment-ktx:1.8.4")
 
 
     testImplementation(libs.junit)
