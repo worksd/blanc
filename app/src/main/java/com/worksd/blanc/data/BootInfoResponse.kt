@@ -15,13 +15,13 @@ data class BootInfoResponse(
 data class BottomMenuResponse(
     @SerializedName("label")
     val label: String,
-    @SerializedName("label_size")
+    @SerializedName("labelSize")
     val labelSize: Int,
-    @SerializedName("label_color")
+    @SerializedName("labelColor")
     val labelColor: String,
-    @SerializedName("icon_url")
+    @SerializedName("iconUrl")
     val iconUrl: String,
-    @SerializedName("icon_size")
+    @SerializedName("iconSize")
     val iconSize: Int,
     @SerializedName("page")
     val page: PageInitResponse,

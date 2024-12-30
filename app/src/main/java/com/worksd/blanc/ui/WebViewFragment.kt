@@ -96,11 +96,13 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun setToken(token: String) {
+                                Log.d("WebAppInterface", "setToken = $token")
                                 PrefUtils(context).setString(FILE_NAME, KEY_TOKEN, token)
                             }
                         }), "KloudEvent")
                         setBackgroundColor(Color.parseColor(initialColor))
                         webViewClient = customWebViewClient
+                        Log.d("WebAppInterface", "initWebView: accessToken=${PrefUtils(context).getString(FILE_NAME, KEY_TOKEN)}")
                         loadUrl(url, mutableMapOf("Cookie" to "accessToken=${PrefUtils(context).getString(FILE_NAME, KEY_TOKEN)}"))
                     }
                 }

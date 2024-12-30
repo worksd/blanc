@@ -134,7 +134,6 @@ class BlancActivity : AppCompatActivity() {
                     hide(fragment)
                     commit()
                 }
-                delay(100L) // TODO: 하드코딩 수정
                 showFragment(bottomMenuList.first().page.route)
             }
         }

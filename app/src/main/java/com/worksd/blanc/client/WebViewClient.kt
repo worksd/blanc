@@ -81,6 +81,10 @@ class WebAppInterface(val receiver: EventReceiver) {
         Log.d("WebAppInterface", "onSplashStarted")
     }
 
+    @JavascriptInterface
+    fun setToken(token: String) {
+        receiver.setToken(token)
+    }
 }
 
 
