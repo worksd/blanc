@@ -59,7 +59,7 @@ class BlancActivity : AppCompatActivity() {
                 supportFragmentManager.beginTransaction().apply {
                     val fragment = WebViewFragment.newInstance(
                         url = getUrl(page.route),
-                        initialColor = page.initialColor,
+                        initialColor = "#FFFFFF",
                     )
                     add(binding.detailFragmentContainer.id, fragment, page.route)
                     addToBackStack(it)
@@ -101,7 +101,7 @@ class BlancActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().apply {
             val fragment = WebViewFragment.newInstance(
                 url = getUrl(page.route),
-                initialColor = page.initialColor,
+                initialColor = "#FFFFFF",
             )
             replace(binding.detailFragmentContainer.id, fragment, page.route)
             show(fragment)
@@ -179,6 +179,6 @@ class BlancActivity : AppCompatActivity() {
     }
 
     private fun getUrl(route: String): String {
-        return "192.168.45.76:3000$route"
+        return "https://kloud-alpha.vercel.app/$route"
     }
 }
