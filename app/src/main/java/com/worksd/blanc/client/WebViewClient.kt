@@ -85,6 +85,11 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun setToken(token: String) {
         receiver.setToken(token)
     }
+
+    @JavascriptInterface
+    fun clearToken() {
+        receiver.clearToken()
+    }
 }
 
 

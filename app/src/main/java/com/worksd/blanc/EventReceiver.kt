@@ -7,4 +7,5 @@ interface EventReceiver {
     fun pushAndAllClear(route: String)
     fun back()
     fun setToken(token: String)
+    fun clearToken()
 }

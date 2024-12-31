@@ -7,6 +7,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.CookieManager
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import com.worksd.blanc.EventReceiver
@@ -22,6 +23,7 @@ import com.worksd.blanc.utils.PrefUtils
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
+    private val cookieManager by lazy { CookieManager.getInstance()}
     private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var binding: FragmentWebViewBinding
@@ -49,7 +51,12 @@ class WebViewFragment : Fragment() {
         url: String, initialColor: String
     ) {
         try {
+
             binding.apply {
+                cookieManager.apply {
+                    this.acceptCookie()
+                    this.acceptThirdPartyCookies(webView)
+                }
                 root.setBackgroundColor(Color.parseColor(initialColor))
                 webView.apply {
                     settings.apply {
@@ -97,13 +104,17 @@ class WebViewFragment : Fragment() {
 
                             override fun setToken(token: String) {
                                 Log.d("WebAppInterface", "setToken = $token")
-                                PrefUtils(context).setString(FILE_NAME, KEY_TOKEN, token)
+                            }
+
+                            override fun clearToken() {
+                                cookieManager.removeAllCookies(null)
                             }
                         }), "KloudEvent")
                         setBackgroundColor(Color.parseColor(initialColor))
                         webViewClient = customWebViewClient
-                        Log.d("WebAppInterface", "initWebView: accessToken=${PrefUtils(context).getString(FILE_NAME, KEY_TOKEN)}")
-                        loadUrl(url, mutableMapOf("Cookie" to "accessToken=${PrefUtils(context).getString(FILE_NAME, KEY_TOKEN)}"))
+                        Log.d("WebAppInterface", "initWebView: $")
+                        Log.d("WebAppInterface", "cookie: ${cookieManager.getCookie(url)}")
+                        loadUrl(url)
                     }
                 }
             }

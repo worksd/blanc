@@ -13,7 +13,6 @@ import com.worksd.blanc.ui.BottomNavigation
 import com.worksd.blanc.ui.MainViewModel
 import com.worksd.blanc.ui.WebViewFragment
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
@@ -27,7 +26,7 @@ class BlancActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        navigate(page = PageInitResponse(route ="/splash", initialColor = "#000000"))
+        navigate(page = PageInitResponse(route = "/splash", initialColor = "#000000"))
 
         collectReplace()
         collectPush()
@@ -120,7 +119,10 @@ class BlancActivity : AppCompatActivity() {
                 commit()
 
                 supportFragmentManager.fragments.forEach {
-                    supportFragmentManager.popBackStack(it.tag, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                    supportFragmentManager.popBackStack(
+                        it.tag,
+                        FragmentManager.POP_BACK_STACK_INCLUSIVE
+                    )
                 }
             }
 
@@ -133,8 +135,9 @@ class BlancActivity : AppCompatActivity() {
                     add(binding.fragmentContainer.id, fragment, it.page.route)
                     hide(fragment)
                     commit()
+                    showFragment(bottomMenuList.first().page.route)
                 }
-                showFragment(bottomMenuList.first().page.route)
+
             }
         }
 
@@ -150,9 +153,9 @@ class BlancActivity : AppCompatActivity() {
 
     private fun showFragment(route: String) {
         val transaction = supportFragmentManager.beginTransaction()
-            supportFragmentManager.fragments.forEach { transaction.hide(it) }
-            supportFragmentManager.findFragmentByTag(route)?.let { transaction.show(it) }
-            transaction.commit()
+        supportFragmentManager.fragments.forEach { transaction.hide(it) }
+        supportFragmentManager.findFragmentByTag(route)?.let { transaction.show(it) }
+        transaction.commit()
     }
 
     private fun launchFragment(page: PageInitResponse) {
@@ -173,34 +176,7 @@ class BlancActivity : AppCompatActivity() {
         )
     }
 
-    private val bottomMenuList = listOf(
-        BottomMenuResponse(
-            label = "홈",
-            labelSize = 12,
-            labelColor = "#000000",
-            iconUrl = "",
-            iconSize = 24,
-            page = PageInitResponse(route ="home", initialColor = "#000000"),
-        ),
-        BottomMenuResponse(
-            label = "프로필",
-            labelSize = 12,
-            labelColor = "#000000",
-            iconUrl = "",
-            iconSize = 24,
-            page = PageInitResponse(route ="profile", initialColor = "#000000"),
-        ),
-        BottomMenuResponse(
-            label = "알림",
-            labelSize = 12,
-            labelColor = "#000000",
-            iconUrl = "",
-            iconSize = 24,
-            page = PageInitResponse(route ="notifications", initialColor = "#000000"),
-        )
-    )
-
     private fun getUrl(route: String): String {
-        return "http://192.168.45.33:3000$route"
+        return "192.168.45.76:3000$route"
     }
 }
