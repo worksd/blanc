@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.collectAsState
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
 import com.worksd.blanc.data.BottomMenuResponse
@@ -52,7 +53,7 @@ class BlancActivity : AppCompatActivity() {
             viewModel.push.collect {
                 val page = PageInitResponse(
                     route = it,
-                    initialColor = "#FFFFFF"
+                    initialColor = "#FFFFFFF"
                 )
                 Log.d("webAppInterface", "good!")
                 supportFragmentManager.beginTransaction().apply {
@@ -80,7 +81,7 @@ class BlancActivity : AppCompatActivity() {
                     launchFragment(
                         PageInitResponse(
                             route = it,
-                            initialColor = "#FFFFFF"
+                            initialColor = "#FFFFFFF"
                         )
                     )
                 }
@@ -126,27 +127,28 @@ class BlancActivity : AppCompatActivity() {
                 }
             }
 
-            bottomMenuList.forEach {
+            bottomMenuList.reversed().forEach {
                 val fragment = WebViewFragment.newInstance(
                     url = getUrl(it.page.route),
                     initialColor = it.page.initialColor,
                 )
                 supportFragmentManager.beginTransaction().apply {
                     add(binding.fragmentContainer.id, fragment, it.page.route)
-                    hide(fragment)
                     commit()
-                    showFragment(bottomMenuList.first().page.route)
                 }
 
             }
+            viewModel.selectBottomMenu(bottomMenuList.first().page.route)
         }
 
         binding.bottomNavigation.setContent {
             BottomNavigation(
                 bottomMenuList = bottomMenuList,
                 onClick = { route ->
+                    viewModel.selectBottomMenu(route)
                     showFragment(route)
-                }
+                },
+                currentSelectedRoute = viewModel.currentSelectedIndex.collectAsState().value
             )
         }
     }

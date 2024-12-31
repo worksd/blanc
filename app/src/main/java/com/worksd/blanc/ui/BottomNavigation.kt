@@ -1,5 +1,6 @@
 package com.worksd.blanc.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -13,12 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.worksd.blanc.data.BottomMenuResponse
 
 @Composable
 fun BottomNavigation(
+    currentSelectedRoute: String,
     bottomMenuList: List<BottomMenuResponse>,
     onClick: (String) -> Unit,
 ) {
@@ -33,6 +36,7 @@ fun BottomNavigation(
                 ) {
                     onClick(item.page.route)
                 },
+                currentSelectedRoute = currentSelectedRoute,
                 item = item,
             )
         }
@@ -42,10 +46,17 @@ fun BottomNavigation(
 @Composable
 fun BottomNavigationItem(
     modifier: Modifier = Modifier,
+    currentSelectedRoute: String,
     item: BottomMenuResponse,
 ) {
     Box(
-        modifier = modifier.fillMaxHeight(),
+        modifier = modifier.fillMaxHeight().background(
+            if (currentSelectedRoute == item.page.route) {
+                Color.Red
+            } else {
+                Color.White
+            }
+        ),
         contentAlignment = Alignment.Center,
     ) {
         Column(

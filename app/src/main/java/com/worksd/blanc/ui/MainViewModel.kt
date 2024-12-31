@@ -28,8 +28,8 @@ class MainViewModel @Inject constructor(
     private val _bottomMenuList: MutableStateFlow<List<BottomMenuResponse>> = MutableStateFlow(listOf())
     val bottomMenuList: StateFlow<List<BottomMenuResponse>> = _bottomMenuList
 
-    private val _currentSelectedIndex: MutableStateFlow<Int> = MutableStateFlow(0)
-    val currentSelectedIndex: StateFlow<Int> = _currentSelectedIndex
+    private val _currentSelectedIndex: MutableStateFlow<String> = MutableStateFlow("")
+    val currentSelectedIndex: StateFlow<String> = _currentSelectedIndex
 
     private val _replace: MutableSharedFlow<String> = MutableSharedFlow()
     val replace: SharedFlow<String> = _replace
@@ -58,9 +58,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun selectBottomMenu(index: Int) {
+    fun selectBottomMenu(route: String) {
         viewModelScope.launch(Dispatchers.Main) {
-            _currentSelectedIndex.emit(index)
+            _currentSelectedIndex.emit(route)
         }
     }
 

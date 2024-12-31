@@ -69,7 +69,6 @@ class WebViewFragment : Fragment() {
                         val customWebViewClient =
                             CustomWebViewClient(context, object : WebViewListener {
                                 override fun onConnectSuccess() {
-
                                 }
 
                                 override fun onConnectFail() {
