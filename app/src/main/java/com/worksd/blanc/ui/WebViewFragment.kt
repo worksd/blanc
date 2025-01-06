@@ -1,6 +1,7 @@
 package com.worksd.blanc.ui
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
@@ -8,25 +9,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
+import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
-import com.worksd.blanc.EventReceiver
-import com.worksd.blanc.WebViewListener
+import com.worksd.blanc.R
+import com.worksd.blanc.client.EventReceiver
+import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.client.WebAppInterface
 import com.worksd.blanc.databinding.FragmentWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import com.worksd.blanc.utils.PrefKeys.Session.FILE_NAME
-import com.worksd.blanc.utils.PrefKeys.Session.KEY_TOKEN
-import com.worksd.blanc.utils.PrefUtils
 
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance()}
-    private val viewModel: MainViewModel by activityViewModels()
 
     private lateinit var binding: FragmentWebViewBinding
+    private var toast: Toast? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,14 +40,14 @@ class WebViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initWebView(
-            url = requireArguments().getString(ARG_URL).orEmpty(),
+            route = requireArguments().getString(ARG_ROUTE).orEmpty(),
             initialColor = requireArguments().getString(ARG_INITIAL_COLOR).orEmpty()
         )
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(
-        url: String, initialColor: String
+        route: String, initialColor: String = "#FFFFFF"
     ) {
         try {
 
@@ -67,53 +66,46 @@ class WebViewFragment : Fragment() {
                         allowContentAccess = true
                         domStorageEnabled = true
                         val customWebViewClient =
-                            CustomWebViewClient(context, object : WebViewListener {
+                            CustomWebViewClient(object : WebViewListener {
                                 override fun onConnectSuccess() {
                                 }
 
                                 override fun onConnectFail() {
                                 }
-
-                                override fun onSplashPageStarted() {
-                                }
                             })
-                        addJavascriptInterface(WebAppInterface(object :EventReceiver {
-                            override fun fetchBootInfo(bootInfo: String) {
-                                viewModel.setBootInfo(bootInfo)
+                        addJavascriptInterface(WebAppInterface(object : EventReceiver {
+                            override fun showToast(message: String) {
+                                toast?.cancel()
+                                toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
+                                toast?.show()
                             }
 
                             override fun replace(route: String) {
-                                Log.d("WebAppInterface", "replace = $route")
-                                viewModel.navigate(route)
+                                initWebView(route)
                             }
 
                             override fun push(route: String) {
-                                Log.d("WebAppInterface", "push = $route")
-                                viewModel.push(route)
+                                navigate(route)
                             }
 
                             override fun pushAndAllClear(route: String) {
-                                Log.d("WebAppInterface", "clear And Push = $route")
-                                viewModel.clearAndPush(route)
+                                navigate(route, true)
                             }
 
                             override fun back() {
-                                viewModel.back()
+                                requireActivity().finish()
                             }
 
-                            override fun setToken(token: String) {
-                                Log.d("WebAppInterface", "setToken = $token")
+                            override fun navigateMain(bootInfo: String) {
+                                launchMainScreen(bootInfo)
                             }
 
                             override fun clearToken() {
                                 cookieManager.removeAllCookies(null)
                             }
                         }), "KloudEvent")
-                        setBackgroundColor(Color.parseColor(initialColor))
                         webViewClient = customWebViewClient
-                        Log.d("WebAppInterface", "initWebView: $")
-                        Log.d("WebAppInterface", "cookie: ${cookieManager.getCookie(url)}")
-                        loadUrl(url)
+                        loadUrl(getUrl(route))
                     }
                 }
             }
@@ -122,15 +114,42 @@ class WebViewFragment : Fragment() {
         }
     }
 
+    private fun navigate(route: String, withClear: Boolean = false) {
+        val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
+            if (withClear) {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+        }
+        intent.putExtra("route", route)
+        startActivity(intent)
+        if (withClear) {
+            requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down)
+
+        }
+    }
+
+    private fun launchMainScreen(bootInfo: String) {
+        val intent = Intent(requireActivity(), MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        intent.putExtra("bootInfo", bootInfo)
+        startActivity(intent)
+
+    }
+
+    private fun getUrl(route: String): String {
+        return "http://192.168.0.6:3000/$route"
+    }
+
     companion object {
-        private const val ARG_URL = "ARG_URL"
+        private const val ARG_ROUTE = "ARG_ROUTE"
         private const val ARG_INITIAL_COLOR = "ARG_INITIAL_COLOR"
         fun newInstance(
-            url: String,
+            route: String,
             initialColor: String,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
-                putString(ARG_URL, url)
+                putString(ARG_ROUTE, route)
                 putString(ARG_INITIAL_COLOR, initialColor)
             }
         }

@@ -10,11 +10,9 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
-import com.worksd.blanc.EventReceiver
-import com.worksd.blanc.WebViewListener
 
 
-class CustomWebViewClient(val context: Context, val listener: WebViewListener) : WebViewClient() {
+class CustomWebViewClient(private val listener: WebViewListener) : WebViewClient() {
 
     override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
         super.onPageStarted(view, url, favicon)
@@ -71,38 +69,17 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
-    fun sendBootInfo(bootInfo: String) {
-        Log.d("WebAppInterface", "sendBootInfo: $bootInfo")
-        receiver.fetchBootInfo(bootInfo)
-    }
-
-    @JavascriptInterface
-    fun onSplashStarted() {
-        Log.d("WebAppInterface", "onSplashStarted")
-    }
-
-    @JavascriptInterface
-    fun setToken(token: String) {
-        receiver.setToken(token)
+    fun navigateMain(bootInfo: String) {
+        receiver.navigateMain(bootInfo)
     }
 
     @JavascriptInterface
     fun clearToken() {
         receiver.clearToken()
     }
-}
 
-
-private fun createJavaScriptFunction(functionName: String, parameterMap: Any?): String {
-    val paramJsonString = parameterMap?.let {
-        Gson().toJson(parameterMap)
-    } ?: ""
-    return "javascript:$functionName($paramJsonString)"
-}
-
-
-@JavascriptInterface
-fun WebView.onSplashStarted() {
-    Log.d("WebAppInterface", "onSplashStarted")
-    this.loadUrl(createJavaScriptFunction("onSplashStarted", null))
+    @JavascriptInterface
+    fun showToast(message: String) {
+        receiver.showToast(message)
+    }
 }
