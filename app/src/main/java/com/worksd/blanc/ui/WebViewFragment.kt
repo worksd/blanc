@@ -138,7 +138,7 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "http://192.168.0.6:3000/$route"
+        return "http://192.168.45.45:3000/$route"
     }
 
     companion object {

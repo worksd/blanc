@@ -32,6 +32,7 @@ class WebViewActivity : AppCompatActivity() {
         if (route.isNullOrEmpty()) {
             loadSplashScreen()
             loadWebViewFragment("/splash")
+            window.navigationBarColor = android.graphics.Color.parseColor("#000000")
         } else {
             loadWebViewFragment(route)
         }
