@@ -8,4 +8,5 @@ interface EventReceiver {
     fun pushAndAllClear(route: String)
     fun back()
     fun clearToken()
+    fun sendHapticFeedback()
 }

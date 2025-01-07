@@ -82,4 +82,9 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun showToast(message: String) {
         receiver.showToast(message)
     }
+
+    @JavascriptInterface
+    fun sendHapticFeedback() {
+        receiver.sendHapticFeedback()
+    }
 }

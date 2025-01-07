@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -102,6 +103,10 @@ class WebViewFragment : Fragment() {
 
                             override fun clearToken() {
                                 cookieManager.removeAllCookies(null)
+                            }
+
+                            override fun sendHapticFeedback() {
+                                requireView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                             }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
