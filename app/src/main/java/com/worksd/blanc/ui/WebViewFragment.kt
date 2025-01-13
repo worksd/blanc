@@ -143,7 +143,7 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "http://192.168.45.45:3000/$route"
+        return "https://kloud-alpha.vercel.app$route"
     }
 
     companion object {
