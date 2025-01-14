@@ -12,18 +12,25 @@ import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import com.worksd.blanc.R
 import com.worksd.blanc.client.EventReceiver
 import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.client.WebAppInterface
+import com.worksd.blanc.client.onGoogleLoginSuccess
+import com.worksd.blanc.client.onKakaoLoginSuccess
 import com.worksd.blanc.databinding.FragmentWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance()}
+    private val viewModel: SnsLoginViewModel by viewModels()
 
     private lateinit var binding: FragmentWebViewBinding
     private var toast: Toast? = null
@@ -44,6 +51,7 @@ class WebViewFragment : Fragment() {
             route = requireArguments().getString(ARG_ROUTE).orEmpty(),
             initialColor = requireArguments().getString(ARG_INITIAL_COLOR).orEmpty()
         )
+        collectEvents()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
@@ -108,6 +116,14 @@ class WebViewFragment : Fragment() {
                             override fun sendHapticFeedback() {
                                 requireView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                             }
+
+                            override fun sendKakaoLogin() {
+                                viewModel.kakaoLogin(requireContext())
+                            }
+
+                            override fun sendGoogleLogin() {
+                                viewModel.googleLogin(requireContext())
+                            }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
                         loadUrl(getUrl(route))
@@ -143,7 +159,27 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "https://kloud-alpha.vercel.app$route"
+        return "http://192.168.45.30:3000$route"
+    }
+
+    private fun collectEvents() {
+        lifecycleScope.launch {
+            viewModel.onKakaoLoginSuccess.collect {
+                binding.webView.onKakaoLoginSuccess(requireActivity(), it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.onGoogleLoginSuccess.collect {
+                binding.webView.onGoogleLoginSuccess(requireActivity(), it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.errorInvoked.collect {
+                Log.d("WebAppInterface", "collectEvents: ${it.message}")
+            }
+        }
     }
 
     companion object {

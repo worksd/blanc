@@ -87,4 +87,14 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun sendHapticFeedback() {
         receiver.sendHapticFeedback()
     }
+
+    @JavascriptInterface
+    fun sendKakaoLogin() {
+        receiver.sendKakaoLogin()
+    }
+
+    @JavascriptInterface
+    fun sendGoogleLogin() {
+        receiver.sendGoogleLogin()
+    }
 }

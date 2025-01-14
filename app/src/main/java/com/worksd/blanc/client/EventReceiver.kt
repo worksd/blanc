@@ -9,4 +9,6 @@ interface EventReceiver {
     fun back()
     fun clearToken()
     fun sendHapticFeedback()
+    fun sendKakaoLogin()
+    fun sendGoogleLogin()
 }

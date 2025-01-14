@@ -42,6 +42,18 @@
             </intent-filter>
 
         </service>
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="oauth"
+                    android:scheme="kakao198ee4b72a3466ab10d4b1ff27bbc695" />
+            </intent-filter>
+        </activity>
     </application>
 
 </manifest>
