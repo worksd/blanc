@@ -21,6 +21,7 @@ import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.client.WebAppInterface
 import com.worksd.blanc.client.onGoogleLoginSuccess
 import com.worksd.blanc.client.onKakaoLoginSuccess
+import com.worksd.blanc.data.KloudDialogInfo
 import com.worksd.blanc.databinding.FragmentWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collect
@@ -124,6 +125,22 @@ class WebViewFragment : Fragment() {
                             override fun sendGoogleLogin() {
                                 viewModel.googleLogin(requireContext())
                             }
+
+                            override fun showDialog(dialogInfo: KloudDialogInfo) {
+                                KloudDialog.newInstance(
+                                    route = dialogInfo.route,
+                                    hideForeverMessage = dialogInfo.hideForeverMessage,
+                                    imageUrl = dialogInfo.imageUrl,
+                                    imageRatio = dialogInfo.imageRatio,
+                                    onClick = { route ->
+                                        navigate(route)
+                                    }
+                                ).show(childFragmentManager, "KloudDialog")
+                            }
+
+                            override fun showBottomSheet(bottomSheetInfo: String) {
+                                TODO("Not yet implemented")
+                            }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
                         loadUrl(getUrl(route))
@@ -159,7 +176,7 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "http://192.168.45.30:3000$route"
+        return "http://192.168.45.57:3000$route"
     }
 
     private fun collectEvents() {

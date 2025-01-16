@@ -10,6 +10,8 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
+import com.worksd.blanc.data.BootInfoResponse
+import com.worksd.blanc.data.KloudDialogInfo
 
 
 class CustomWebViewClient(private val listener: WebViewListener) : WebViewClient() {
@@ -96,5 +98,16 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun sendGoogleLogin() {
         receiver.sendGoogleLogin()
+    }
+
+    @JavascriptInterface
+    fun showDialog(input: String) {
+        val dialogInfo = Gson().fromJson(input, KloudDialogInfo::class.java)
+        receiver.showDialog(dialogInfo)
+    }
+
+    @JavascriptInterface
+    fun showBottomSheet(bottomSheetInfo: String) {
+        receiver.showBottomSheet(bottomSheetInfo)
     }
 }
