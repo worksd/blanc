@@ -11,6 +11,7 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
 import com.worksd.blanc.data.BootInfoResponse
+import com.worksd.blanc.data.GoogleLoginConfiguration
 import com.worksd.blanc.data.KloudDialogInfo
 import com.worksd.blanc.data.PaymentInfo
 
@@ -97,8 +98,9 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
-    fun sendGoogleLogin() {
-        receiver.sendGoogleLogin()
+    fun sendGoogleLogin(configuration: String) {
+        val googleConfiguration = Gson().fromJson(configuration, GoogleLoginConfiguration::class.java)
+        receiver.sendGoogleLogin(googleConfiguration)
     }
 
     @JavascriptInterface

@@ -25,6 +25,7 @@ import com.worksd.blanc.client.onDialogConfirm
 import com.worksd.blanc.client.onGoogleLoginSuccess
 import com.worksd.blanc.client.onKakaoLoginSuccess
 import com.worksd.blanc.client.onPaymentSuccess
+import com.worksd.blanc.data.GoogleLoginConfiguration
 import com.worksd.blanc.data.KloudDialogInfo
 import com.worksd.blanc.data.PaymentInfo
 import com.worksd.blanc.databinding.FragmentWebViewBinding
@@ -80,14 +81,13 @@ class WebViewFragment : Fragment() {
 
         initWebView(
             route = requireArguments().getString(ARG_ROUTE).orEmpty(),
-            initialColor = requireArguments().getString(ARG_INITIAL_COLOR).orEmpty()
         )
         collectEvents()
     }
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(
-        route: String, initialColor: String = "#FFFFFF"
+        route: String,
     ) {
         try {
 
@@ -96,7 +96,6 @@ class WebViewFragment : Fragment() {
                     this.acceptCookie()
                     this.acceptThirdPartyCookies(webView)
                 }
-                root.setBackgroundColor(Color.parseColor(initialColor))
                 webView.apply {
                     settings.apply {
                         javaScriptEnabled = true
@@ -111,6 +110,7 @@ class WebViewFragment : Fragment() {
                                 }
 
                                 override fun onConnectFail() {
+                                    showSimpleDialog("서버가 불안정합니다. \n잠시 후 다시 시도해주세요.")
                                 }
                             })
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
@@ -153,13 +153,17 @@ class WebViewFragment : Fragment() {
                                 viewModel.kakaoLogin(requireContext())
                             }
 
-                            override fun sendGoogleLogin() {
-                                viewModel.googleLogin(requireContext())
+                            override fun sendGoogleLogin(configuration: GoogleLoginConfiguration) {
+                                viewModel.googleLogin(
+                                    context = requireContext(),
+                                    serverClientId = configuration.serverClientId,
+                                    nonce = configuration.nonce,
+                                )
                             }
 
                             override fun showDialog(dialogInfo: KloudDialogInfo) {
                                 KloudDialog.newInstance(
-                                    id = dialogInfo.id,
+                                    id = dialogInfo.id.orEmpty(),
                                     route = dialogInfo.route,
                                     hideForeverMessage = dialogInfo.hideForeverMessage,
                                     imageUrl = dialogInfo.imageUrl,
@@ -175,6 +179,7 @@ class WebViewFragment : Fragment() {
                                     withBackArrow = dialogInfo.withBackArrow,
                                     withConfirmButton = dialogInfo.withConfirmButton,
                                     withCancelButton = dialogInfo.withCancelButton,
+                                    type = "asdf" // TODO: 하드코딩 삭제
                                 ).show(childFragmentManager, "KloudDialog")
                             }
 
@@ -247,7 +252,6 @@ class WebViewFragment : Fragment() {
     private fun requestPayment(paymentInfo: PaymentInfo) {
         Log.d("WebAppInterface", "requestPayment: $paymentInfo")
         try {
-
             PortOne.requestPayment(
                 requireActivity(),
                 request = PaymentRequest(
@@ -265,16 +269,26 @@ class WebViewFragment : Fragment() {
         }
     }
 
+    private fun showSimpleDialog(message: String) {
+        val dialog = KloudDialog.newInstance(
+            id = "simpleDialog",
+            type = "simple",
+            title = message,
+        )
+        dialog.show(childFragmentManager, "KloudDialog")
+    }
+
+    private fun onErrorInvoked() {
+
+    }
+
     companion object {
         private const val ARG_ROUTE = "ARG_ROUTE"
-        private const val ARG_INITIAL_COLOR = "ARG_INITIAL_COLOR"
         fun newInstance(
             route: String,
-            initialColor: String,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_ROUTE, route)
-                putString(ARG_INITIAL_COLOR, initialColor)
             }
         }
     }

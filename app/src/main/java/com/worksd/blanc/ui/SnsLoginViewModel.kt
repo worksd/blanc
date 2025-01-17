@@ -38,10 +38,10 @@ class SnsLoginViewModel @Inject constructor(
         }
     }
 
-    fun googleLogin(context: Context) {
+    fun googleLogin(context: Context, serverClientId: String, nonce: String) {
         viewModelScope.launch {
             runCatching {
-                loginRepository.googleLogin(context)
+                loginRepository.googleLogin(context, serverClientId, nonce)
             }.onSuccess {
                 _onGoogleLoginSuccess.emit(it)
             }.onFailure {

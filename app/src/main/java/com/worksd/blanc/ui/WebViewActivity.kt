@@ -65,7 +65,6 @@ class WebViewActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().apply {
             val fragment = WebViewFragment.newInstance(
                 route = route,
-                initialColor = "#FFFFFF",
             )
             replace(binding.fragmentContainer.id, fragment, route)
             show(fragment)

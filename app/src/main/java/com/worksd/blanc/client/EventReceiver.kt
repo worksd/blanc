@@ -1,5 +1,6 @@
 package com.worksd.blanc.client
 
+import com.worksd.blanc.data.GoogleLoginConfiguration
 import com.worksd.blanc.data.KloudDialogInfo
 
 interface EventReceiver {
@@ -12,7 +13,7 @@ interface EventReceiver {
     fun clearToken()
     fun sendHapticFeedback()
     fun sendKakaoLogin()
-    fun sendGoogleLogin()
+    fun sendGoogleLogin(configuration: GoogleLoginConfiguration)
     fun showDialog(dialogInfo: KloudDialogInfo)
     fun showBottomSheet(bottomSheetInfo: String)
     fun requestPayment(command: String)

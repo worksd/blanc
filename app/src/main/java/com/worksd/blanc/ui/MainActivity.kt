@@ -120,7 +120,6 @@ class MainActivity : AppCompatActivity() {
             bottomMenuList.reversed().forEach {
                 val fragment = WebViewFragment.newInstance(
                     route = it.page.route,
-                    initialColor = it.page.initialColor,
                 )
                 supportFragmentManager.beginTransaction().apply {
                     add(binding.fragmentContainer.id, fragment, it.page.route)

@@ -1,6 +1,7 @@
 package com.worksd.blanc.ui
 
 import android.app.Dialog
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -64,29 +65,49 @@ class KloudDialog : DialogFragment() {
         val withBackArrow = requireArguments().getBoolean("withBackArrow", false)
         val withConfirmButton = requireArguments().getBoolean("withConfirmButton", false)
         val withCancelButton = requireArguments().getBoolean("withCancelButton", false)
+        val type = requireArguments().getString("type")
 
         return ComposeView(requireContext()).apply {
             setContent {
-                KloudDialogScreen(
-                    id = id,
-                    hideForeverMessage = hideForeverMessage,
-                    imageUrl = imageUrl,
-                    imageRatio = imageRatio,
-                    onDismissRequest = {
-                        dismiss()
-                    },
-                    onClick = {
-                        dismiss()
-                        onClick?.invoke(route)
-                    },
-                    title = title,
-                    body = body,
-                    withBackArrow = withBackArrow,
-                    withConfirmButton = withConfirmButton,
-                    withCancelButton = withCancelButton,
-                )
+                if (type == "simple") {
+                    SimpleDialogScreen(
+                        id = id,
+                        title = title.orEmpty(),
+                        onClick = {
+                            onClick?.invoke(it)
+                        },
+                        onDismissRequest = {
+                            dismiss()
+                        }
+                    )
+                } else {
+                    KloudDialogScreen(
+                        id = id,
+                        hideForeverMessage = hideForeverMessage,
+                        imageUrl = imageUrl,
+                        imageRatio = imageRatio,
+                        onDismissRequest = {
+                            dismiss()
+                        },
+                        onClick = {
+                            dismiss()
+                            onClick?.invoke(route)
+                        },
+                        title = title,
+                        body = body,
+                        withBackArrow = withBackArrow,
+                        withConfirmButton = withConfirmButton,
+                        withCancelButton = withCancelButton,
+                    )
+                }
             }
         }
+    }
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        val dialog = super.onCreateDialog(savedInstanceState)
+        dialog.window?.setBackgroundDrawable(ColorDrawable(resources.getColor(android.R.color.transparent)))
+        return dialog
     }
 
     override fun show(manager: FragmentManager, tag: String?) {
@@ -101,21 +122,23 @@ class KloudDialog : DialogFragment() {
 
     companion object {
         fun newInstance(
-            id: String?,
-            route: String?,
-            title: String?,
-            body: String?,
-            hideForeverMessage: String?,
-            imageUrl: String?,
-            imageRatio: Float?,
-            withBackArrow: Boolean?,
-            withConfirmButton: Boolean?,
-            withCancelButton: Boolean?,
-            onClick: (String) -> Unit
+            id: String,
+            type: String,
+            route: String? = null,
+            title: String? = null,
+            body: String? = null,
+            hideForeverMessage: String? = null,
+            imageUrl: String? = null,
+            imageRatio: Float? = null,
+            withBackArrow: Boolean? = false,
+            withConfirmButton: Boolean? = false,
+            withCancelButton: Boolean? = false,
+            onClick: (String) -> Unit = {},
         ): KloudDialog {
             val dialog = KloudDialog()
             dialog.arguments = Bundle().apply {
                 putString("id", id)
+                putString("type", type)
                 putString("route", route)
                 putString("title", title)
                 putString("body", body)
@@ -206,13 +229,7 @@ private fun KloudDialogScreen(
         }
 
         if (!title.isNullOrEmpty()) {
-            Text(
-                text = title,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                color = Color.Black
-            )
-            Spacer(modifier = Modifier.height(20.dp))
+
         }
 
         if (!body.isNullOrEmpty()) {
@@ -248,22 +265,7 @@ private fun KloudDialogScreen(
                 }
 
                 if (withConfirmButton) {
-                    Button(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        onClick = {
-                            onDismissRequest()
-                            onClick(id)
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.Black,
-                            contentColor = Color.White
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("확인")
-                    }
+
                 }
             }
         }
@@ -306,13 +308,53 @@ private fun HideForeverRow(
     }
 }
 
+@Composable
+private fun SimpleDialogScreen(
+    id: String,
+    title: String,
+    onClick: (String) -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFEFEFEF))
+            .padding(top = 20.dp, bottom = 10.dp, start = 20.dp, end = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.Black
+        )
+        Spacer(modifier = Modifier.height(20.dp))
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp),
+            onClick = {
+                onDismissRequest()
+                onClick(id)
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black,
+                contentColor = Color.White
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text("확인")
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun KloudSimpleDialogPreview() {
-    KloudDialogScreen(
+    SimpleDialogScreen(
         id = "Simple",
         title = "이미 가입된 계정이 있습니다",
-        withConfirmButton = true,
         onClick = {},
         onDismissRequest = {},
     )
