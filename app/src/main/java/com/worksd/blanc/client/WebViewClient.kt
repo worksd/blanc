@@ -12,6 +12,7 @@ import android.webkit.WebViewClient
 import com.google.gson.Gson
 import com.worksd.blanc.data.BootInfoResponse
 import com.worksd.blanc.data.KloudDialogInfo
+import com.worksd.blanc.data.PaymentInfo
 
 
 class CustomWebViewClient(private val listener: WebViewListener) : WebViewClient() {
@@ -109,5 +110,10 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun showBottomSheet(bottomSheetInfo: String) {
         receiver.showBottomSheet(bottomSheetInfo)
+    }
+
+    @JavascriptInterface
+    fun requestPayment(command: String) {
+        receiver.requestPayment(command)
     }
 }

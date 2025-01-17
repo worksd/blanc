@@ -11,31 +11,60 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.gson.Gson
 import com.worksd.blanc.R
-import com.worksd.blanc.client.EventReceiver
-import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
+import com.worksd.blanc.client.EventReceiver
 import com.worksd.blanc.client.WebAppInterface
+import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.onDialogConfirm
 import com.worksd.blanc.client.onGoogleLoginSuccess
 import com.worksd.blanc.client.onKakaoLoginSuccess
+import com.worksd.blanc.client.onPaymentSuccess
 import com.worksd.blanc.data.KloudDialogInfo
+import com.worksd.blanc.data.PaymentInfo
 import com.worksd.blanc.databinding.FragmentWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.collect
+import io.portone.sdk.android.PortOne
+import io.portone.sdk.android.payment.PaymentCallback
+import io.portone.sdk.android.payment.PaymentRequest
+import io.portone.sdk.android.payment.PaymentResponse
+import io.portone.sdk.android.type.Amount
+import io.portone.sdk.android.type.Currency
+import io.portone.sdk.android.type.PaymentMethod
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
-    private val cookieManager by lazy { CookieManager.getInstance()}
+    private val cookieManager by lazy { CookieManager.getInstance() }
     private val viewModel: SnsLoginViewModel by viewModels()
 
     private lateinit var binding: FragmentWebViewBinding
     private var toast: Toast? = null
+
+    private val paymentActivityResultLauncher =
+        PortOne.registerForPaymentActivity(this, callback = object :
+            PaymentCallback {
+            override fun onSuccess(response: PaymentResponse.Success) {
+                binding.webView.onPaymentSuccess(
+                    requireActivity(),
+                    transactionId = response.txId,
+                    paymentId = response.paymentId
+                )
+            }
+
+            override fun onFail(response: PaymentResponse.Fail) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("결제 실패")
+                    .setMessage(response.toString())
+                    .show()
+            }
+        })
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -87,7 +116,8 @@ class WebViewFragment : Fragment() {
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
                             override fun showToast(message: String) {
                                 toast?.cancel()
-                                toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
+                                toast =
+                                    Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
                                 toast?.show()
                             }
 
@@ -151,6 +181,11 @@ class WebViewFragment : Fragment() {
                             override fun showBottomSheet(bottomSheetInfo: String) {
                                 TODO("Not yet implemented")
                             }
+
+                            override fun requestPayment(command: String) {
+                                val paymentInfo = Gson().fromJson(command, PaymentInfo::class.java)
+                                requestPayment(paymentInfo)
+                            }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
                         loadUrl(getUrl(route))
@@ -186,7 +221,7 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "http://192.168.0.18:3000$route"
+        return "http://192.168.45.132:3000$route"
     }
 
     private fun collectEvents() {
@@ -206,6 +241,27 @@ class WebViewFragment : Fragment() {
             viewModel.errorInvoked.collect {
                 Log.d("WebAppInterface", "collectEvents: ${it.message}")
             }
+        }
+    }
+
+    private fun requestPayment(paymentInfo: PaymentInfo) {
+        Log.d("WebAppInterface", "requestPayment: $paymentInfo")
+        try {
+
+            PortOne.requestPayment(
+                requireActivity(),
+                request = PaymentRequest(
+                    storeId = paymentInfo.storeId,
+                    channelKey = paymentInfo.channelKey,
+                    paymentId = paymentInfo.paymentId,
+                    orderName = paymentInfo.orderName,
+                    amount = Amount(total = paymentInfo.price, currency = Currency.KRW), // 금액
+                    method = PaymentMethod.Card() // 결제수단 관련 정보
+                ),
+                resultLauncher = paymentActivityResultLauncher
+            )
+        } catch (e: Throwable) {
+            Log.d("WebAppInterface", "requestPayment: ${e.message}")
         }
     }
 

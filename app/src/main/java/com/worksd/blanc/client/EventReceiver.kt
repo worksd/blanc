@@ -15,4 +15,5 @@ interface EventReceiver {
     fun sendGoogleLogin()
     fun showDialog(dialogInfo: KloudDialogInfo)
     fun showBottomSheet(bottomSheetInfo: String)
+    fun requestPayment(command: String)
 }

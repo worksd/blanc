@@ -29,6 +29,18 @@ fun WebView.onGoogleLoginSuccess(activity: Activity, code: String) {
     }
 }
 
+fun WebView.onPaymentSuccess(activity: Activity, transactionId: String, paymentId: String) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onPaymentSuccess")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onPaymentSuccess",
+                mapOf("transactionId" to transactionId, "paymentId" to paymentId)
+            )
+        )
+    }
+}
+
 fun WebView.onDialogConfirm(activity: Activity, id: String) {
     activity.runOnUiThread {
         Log.d("WebAppInterface", "onDialogConfirm")

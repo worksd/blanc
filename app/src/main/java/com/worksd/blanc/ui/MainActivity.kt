@@ -1,6 +1,7 @@
 package com.worksd.blanc.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -43,7 +44,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val bootInfo = Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
-        addMainFragment(bootInfo.bottomMenuList)
+        lifecycleScope.launch {
+            addMainFragment(bootInfo.bottomMenuList)
+            if (bootInfo.pushRoute != null) {
+                val intent = Intent(this@MainActivity, WebViewActivity::class.java)
+                intent.putExtra("route", bootInfo.pushRoute)
+                startActivity(intent)
+            }
+        }
+
     }
 
     private fun initFirebaseMessaging() {
