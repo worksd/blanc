@@ -19,6 +19,7 @@ import com.worksd.blanc.client.EventReceiver
 import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.CustomWebViewClient
 import com.worksd.blanc.client.WebAppInterface
+import com.worksd.blanc.client.onDialogConfirm
 import com.worksd.blanc.client.onGoogleLoginSuccess
 import com.worksd.blanc.client.onKakaoLoginSuccess
 import com.worksd.blanc.data.KloudDialogInfo
@@ -128,13 +129,22 @@ class WebViewFragment : Fragment() {
 
                             override fun showDialog(dialogInfo: KloudDialogInfo) {
                                 KloudDialog.newInstance(
+                                    id = dialogInfo.id,
                                     route = dialogInfo.route,
                                     hideForeverMessage = dialogInfo.hideForeverMessage,
                                     imageUrl = dialogInfo.imageUrl,
                                     imageRatio = dialogInfo.imageRatio,
-                                    onClick = { route ->
-                                        navigate(route)
-                                    }
+                                    onClick = { id ->
+                                        binding.webView.onDialogConfirm(
+                                            activity = requireActivity(),
+                                            id = id,
+                                        )
+                                    },
+                                    title = dialogInfo.title,
+                                    body = dialogInfo.body,
+                                    withBackArrow = dialogInfo.withBackArrow,
+                                    withConfirmButton = dialogInfo.withConfirmButton,
+                                    withCancelButton = dialogInfo.withCancelButton,
                                 ).show(childFragmentManager, "KloudDialog")
                             }
 
@@ -176,7 +186,7 @@ class WebViewFragment : Fragment() {
     }
 
     private fun getUrl(route: String): String {
-        return "http://192.168.45.57:3000$route"
+        return "http://192.168.0.18:3000$route"
     }
 
     private fun collectEvents() {

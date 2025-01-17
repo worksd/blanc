@@ -29,6 +29,18 @@ fun WebView.onGoogleLoginSuccess(activity: Activity, code: String) {
     }
 }
 
+fun WebView.onDialogConfirm(activity: Activity, id: String) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onDialogConfirm")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onDialogConfirm",
+                mapOf("id" to id)
+            )
+        )
+    }
+}
+
 private fun createJavaScriptFunction(functionName: String, parameterMap: Any?): String {
     val paramJsonString = parameterMap?.let {
         Gson().toJson(parameterMap)

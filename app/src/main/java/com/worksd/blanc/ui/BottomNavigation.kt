@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
@@ -31,22 +32,35 @@ fun BottomNavigation(
     bottomMenuList: List<BottomMenuResponse>,
     onClick: (String) -> Unit,
 ) {
+    // ImageLoader를 상위 컴포넌트에서 remember로 생성
+    val context = LocalContext.current
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                add(SvgDecoder.Factory())
+            }
+            .build()
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth()
     ) {
         bottomMenuList.forEach { item ->
-            BottomNavigationItem(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) {
-                        onClick(item.page.route)
-                    },
-                currentSelectedRoute = currentSelectedRoute,
-                item = item,
-            )
+            key(item.page.route) {
+                BottomNavigationItem(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            onClick(item.page.route)
+                        },
+                    currentSelectedRoute = currentSelectedRoute,
+                    item = item,
+                    imageLoader = imageLoader,
+                )
+            }
         }
     }
 }
@@ -56,35 +70,33 @@ fun BottomNavigationItem(
     modifier: Modifier = Modifier,
     currentSelectedRoute: String,
     item: BottomMenuResponse,
+    imageLoader: ImageLoader,
 ) {
-    Log.d("DORODORO", item.toString())
-    val context = LocalContext.current
-    val color = rememberUpdatedState(
-        if (currentSelectedRoute == item.page.route) Color.Black else Color(0xFF86898C)
-    )
+    // color를 remember로 계산
+    val isSelected = currentSelectedRoute == item.page.route
+    val color = remember(isSelected) {
+        if (isSelected) Color.Black else Color(0xFF86898C)
+    }
+
     Box(
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = modifier,
+            modifier = Modifier,  // 불필요한 modifier 전달 제거
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             AsyncImage(
-                imageLoader = ImageLoader.Builder(context)
-                    .components {
-                        add(SvgDecoder.Factory())
-                    }
-                    .build(),
+                imageLoader = imageLoader,  // 상위에서 전달받은 imageLoader 사용
                 modifier = Modifier.size(item.iconSize.dp),
                 model = item.iconUrl,
                 contentDescription = null,
-                colorFilter = ColorFilter.tint(color.value),
+                colorFilter = ColorFilter.tint(color),
             )
             Text(
                 text = item.label,
-                color = color.value,
+                color = color,
             )
         }
     }
