@@ -23,13 +23,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
-import coil.compose.AsyncImage
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.worksd.blanc.R
+import okhttp3.OkHttpClient
 
 class KloudDialog : DialogFragment() {
 
@@ -93,7 +97,6 @@ class KloudDialog : DialogFragment() {
         }
     }
 }
-
 @Composable
 private fun KloudDialogScreen(
     route: String,
@@ -103,13 +106,24 @@ private fun KloudDialogScreen(
     onDismissRequest: () -> Unit,
     onClick: (String) -> Unit,
 ) {
+    val context = LocalContext.current
     val isHideForeverClicked = remember { mutableStateOf(false) }
-    val colorFilter = remember(isHideForeverClicked.value) {
-        when (isHideForeverClicked.value) {
-            true -> Color(0xFF000000)
-            false -> Color(0xFFD9D9D9)
-        }
+
+    // ImageLoader를 remember로 캐시
+    val imageLoader = remember {
+        ImageLoader.Builder(context)
+            .components {
+                add(
+                    OkHttpNetworkFetcherFactory(
+                        callFactory = {
+                            OkHttpClient()
+                        }
+                    )
+                )
+            }
+            .build()
     }
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -138,45 +152,57 @@ private fun KloudDialogScreen(
                             onClick(route)
                         }
                     },
+                imageLoader = imageLoader,  // 캐시된 ImageLoader 사용
                 model = imageUrl,
                 contentDescription = "Dialog Image",
                 contentScale = ContentScale.Crop,
             )
         }
-        if (hideForeverMessage != null) {
-            Row(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(
-                        10.dp
-                    )
-                    .pointerInput(Unit) {
-                        detectTapGestures {
-                            isHideForeverClicked.value = !isHideForeverClicked.value
-                        }
-                    },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Image(
-                    painter = painterResource(
-                        when (isHideForeverClicked.value) {
-                            true -> R.drawable.ic_checkbox_filled
-                            false -> R.drawable.ic_checkbox_empty
-                        }
-                    ),
-                    contentDescription = "Hide Forever Checkbox",
-                )
-                Text(
-                    text = hideForeverMessage,
-                    color = colorFilter,
-                    fontWeight = when (isHideForeverClicked.value) {
-                        true -> FontWeight.Bold
-                        false -> null
-                    }
-                )
-            }
-        }
 
+        if (hideForeverMessage != null) {
+            HideForeverRow(
+                modifier = Modifier.align(Alignment.End),
+                message = hideForeverMessage,
+                isChecked = isHideForeverClicked.value,
+                onCheckedChange = { isHideForeverClicked.value = it }
+            )
+        }
+    }
+}
+
+@Composable
+private fun HideForeverRow(
+    modifier: Modifier = Modifier,
+    message: String,
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    val colorFilter = if (isChecked) Color(0xFF000000) else Color(0xFFD9D9D9)
+
+    Row(
+        modifier = modifier
+            .padding(10.dp)
+            .pointerInput(isChecked) {
+                detectTapGestures {
+                    onCheckedChange(!isChecked)
+                }
+            },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Image(
+            painter = painterResource(
+                when (isChecked) {
+                    true -> R.drawable.ic_checkbox_filled
+                    false -> R.drawable.ic_checkbox_empty
+                }
+            ),
+            contentDescription = "Hide Forever Checkbox",
+        )
+        Text(
+            text = message,
+            color = colorFilter,
+            fontWeight = if (isChecked) FontWeight.Bold else null
+        )
     }
 }

@@ -17,8 +17,10 @@ data class BottomMenuResponse(
     val label: String,
     @SerializedName("labelSize")
     val labelSize: Int,
-    @SerializedName("labelColor")
-    val labelColor: String,
+    @SerializedName("selectedColor")
+    val selectedColor: String,
+    @SerializedName("unselectedColor")
+    val unselectedColor: String,
     @SerializedName("iconUrl")
     val iconUrl: String,
     @SerializedName("iconSize")

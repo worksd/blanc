@@ -1,6 +1,6 @@
 package com.worksd.blanc.ui
 
-import androidx.compose.foundation.background
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -18,8 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import coil3.ImageLoader
+import coil3.compose.AsyncImage
+import coil3.svg.SvgDecoder
 import com.worksd.blanc.data.BottomMenuResponse
 
 @Composable
@@ -28,17 +31,19 @@ fun BottomNavigation(
     bottomMenuList: List<BottomMenuResponse>,
     onClick: (String) -> Unit,
 ) {
-    Row (
+    Row(
         modifier = Modifier.fillMaxWidth()
-    ){
+    ) {
         bottomMenuList.forEach { item ->
             BottomNavigationItem(
-                modifier = Modifier.weight(1f).clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    onClick(item.page.route)
-                },
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        onClick(item.page.route)
+                    },
                 currentSelectedRoute = currentSelectedRoute,
                 item = item,
             )
@@ -52,7 +57,11 @@ fun BottomNavigationItem(
     currentSelectedRoute: String,
     item: BottomMenuResponse,
 ) {
-    val color = rememberUpdatedState(if (currentSelectedRoute == item.page.route) Color.Black else Color(0xFF86898C))
+    Log.d("DORODORO", item.toString())
+    val context = LocalContext.current
+    val color = rememberUpdatedState(
+        if (currentSelectedRoute == item.page.route) Color.Black else Color(0xFF86898C)
+    )
     Box(
         modifier = modifier.fillMaxHeight(),
         contentAlignment = Alignment.Center,
@@ -63,9 +72,15 @@ fun BottomNavigationItem(
             verticalArrangement = Arrangement.spacedBy(4.dp),
         ) {
             AsyncImage(
+                imageLoader = ImageLoader.Builder(context)
+                    .components {
+                        add(SvgDecoder.Factory())
+                    }
+                    .build(),
                 modifier = Modifier.size(item.iconSize.dp),
                 model = item.iconUrl,
                 contentDescription = null,
+                colorFilter = ColorFilter.tint(color.value),
             )
             Text(
                 text = item.label,
