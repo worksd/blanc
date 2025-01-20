@@ -2,7 +2,6 @@ package com.worksd.blanc.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
 import android.util.Log
 import android.view.HapticFeedbackConstants
@@ -29,6 +28,7 @@ import com.worksd.blanc.data.GoogleLoginConfiguration
 import com.worksd.blanc.data.KloudDialogInfo
 import com.worksd.blanc.data.PaymentInfo
 import com.worksd.blanc.databinding.FragmentWebViewBinding
+import com.worksd.blanc.util.KloudWebUrlProvider
 import dagger.hilt.android.AndroidEntryPoint
 import io.portone.sdk.android.PortOne
 import io.portone.sdk.android.payment.PaymentCallback
@@ -37,13 +37,14 @@ import io.portone.sdk.android.payment.PaymentResponse
 import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.PaymentMethod
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance() }
-    private val viewModel: SnsLoginViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels()
 
     private lateinit var binding: FragmentWebViewBinding
     private var toast: Toast? = null
@@ -90,7 +91,11 @@ class WebViewFragment : Fragment() {
         route: String,
     ) {
         try {
-
+            viewModel.setLoading(true)
+            lifecycleScope.launch {
+                delay(5000L)
+                viewModel.onConnectFail()
+            }
             binding.apply {
                 cookieManager.apply {
                     this.acceptCookie()
@@ -107,10 +112,11 @@ class WebViewFragment : Fragment() {
                         val customWebViewClient =
                             CustomWebViewClient(object : WebViewListener {
                                 override fun onConnectSuccess() {
+                                    viewModel.setLoading(false)
                                 }
 
                                 override fun onConnectFail() {
-                                    showSimpleDialog("서버가 불안정합니다. \n잠시 후 다시 시도해주세요.")
+
                                 }
                             })
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
@@ -162,6 +168,7 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun showDialog(dialogInfo: KloudDialogInfo) {
+                                Log.d("WebAppInterface", "showDialog: $dialogInfo")
                                 KloudDialog.newInstance(
                                     id = dialogInfo.id.orEmpty(),
                                     route = dialogInfo.route,
@@ -175,11 +182,9 @@ class WebViewFragment : Fragment() {
                                         )
                                     },
                                     title = dialogInfo.title,
-                                    body = dialogInfo.body,
-                                    withBackArrow = dialogInfo.withBackArrow,
-                                    withConfirmButton = dialogInfo.withConfirmButton,
-                                    withCancelButton = dialogInfo.withCancelButton,
-                                    type = "asdf" // TODO: 하드코딩 삭제
+                                    message = dialogInfo.message,
+                                    type = dialogInfo.type,
+                                    ctaButtonText = dialogInfo.ctaButtonText,
                                 ).show(childFragmentManager, "KloudDialog")
                             }
 
@@ -193,7 +198,7 @@ class WebViewFragment : Fragment() {
                             }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
-                        loadUrl(getUrl(route))
+                        loadUrl(KloudWebUrlProvider.getUrl(route))
                     }
                 }
             }
@@ -225,10 +230,6 @@ class WebViewFragment : Fragment() {
 
     }
 
-    private fun getUrl(route: String): String {
-        return "http://192.168.45.132:3000$route"
-    }
-
     private fun collectEvents() {
         lifecycleScope.launch {
             viewModel.onKakaoLoginSuccess.collect {
@@ -245,6 +246,12 @@ class WebViewFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.errorInvoked.collect {
                 Log.d("WebAppInterface", "collectEvents: ${it.message}")
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.isConnectFail.collect {
+                showSimpleDialog("네트워크 연결 실패", "서버가 불안정합니다.\n잠시 후 다시 시도해주세요.")
             }
         }
     }
@@ -269,11 +276,12 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    private fun showSimpleDialog(message: String) {
+    private fun showSimpleDialog(title: String, message: String?) {
         val dialog = KloudDialog.newInstance(
-            id = "simpleDialog",
-            type = "simple",
-            title = message,
+            id = "Error",
+            type = KloudDialogType.SIMPLE.name,
+            title = title,
+            message = message,
         )
         dialog.show(childFragmentManager, "KloudDialog")
     }

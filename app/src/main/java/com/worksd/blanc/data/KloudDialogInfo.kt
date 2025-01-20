@@ -7,6 +7,8 @@ import com.google.gson.annotations.SerializedName
 data class KloudDialogInfo(
     @SerializedName("id")
     val id: String?,
+    @SerializedName("type")
+    val type: String,
     @SerializedName("route")
     val route: String?,
     @SerializedName("hideForeverMessage")
@@ -17,12 +19,8 @@ data class KloudDialogInfo(
     val imageRatio: Float?,
     @SerializedName("title")
     val title: String?,
-    @SerializedName("body")
-    val body: String?,
-    @SerializedName("withBackArrow")
-    val withBackArrow: Boolean?,
-    @SerializedName("withConfirmButton")
-    val withConfirmButton: Boolean?,
-    @SerializedName("withCancelButton")
-    val withCancelButton: Boolean?,
+    @SerializedName("message")
+    val message: String?,
+    @SerializedName("ctaButtonText")
+    val ctaButtonText: String?
 )

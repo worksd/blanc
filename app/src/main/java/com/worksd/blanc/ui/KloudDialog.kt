@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Space
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -18,6 +17,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ComposeView
@@ -38,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.FragmentManager
 import coil3.ImageLoader
@@ -45,6 +47,11 @@ import coil3.compose.AsyncImage
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.worksd.blanc.R
 import okhttp3.OkHttpClient
+
+enum class KloudDialogType {
+    SIMPLE,
+    IMAGE,
+}
 
 class KloudDialog : DialogFragment() {
 
@@ -61,15 +68,13 @@ class KloudDialog : DialogFragment() {
         val imageUrl = requireArguments().getString("imageUrl")
         val imageRatio = requireArguments().getFloat("imageRatio")
         val title = requireArguments().getString("title")
-        val body = requireArguments().getString("body")
-        val withBackArrow = requireArguments().getBoolean("withBackArrow", false)
-        val withConfirmButton = requireArguments().getBoolean("withConfirmButton", false)
-        val withCancelButton = requireArguments().getBoolean("withCancelButton", false)
+        val message = requireArguments().getString("message")
         val type = requireArguments().getString("type")
+        val ctaButtonText = requireArguments().getString("ctaButtonText")
 
         return ComposeView(requireContext()).apply {
             setContent {
-                if (type == "simple") {
+                if (type == KloudDialogType.SIMPLE.name) {
                     SimpleDialogScreen(
                         id = id,
                         title = title.orEmpty(),
@@ -78,26 +83,22 @@ class KloudDialog : DialogFragment() {
                         },
                         onDismissRequest = {
                             dismiss()
-                        }
+                        },
+                        message = message,
                     )
-                } else {
-                    KloudDialogScreen(
+                } else if (type == KloudDialogType.IMAGE.name) {
+                    ImageDialogScreen(
                         id = id,
                         hideForeverMessage = hideForeverMessage,
-                        imageUrl = imageUrl,
+                        imageUrl = imageUrl.orEmpty(),
                         imageRatio = imageRatio,
                         onDismissRequest = {
                             dismiss()
                         },
                         onClick = {
-                            dismiss()
                             onClick?.invoke(route)
                         },
-                        title = title,
-                        body = body,
-                        withBackArrow = withBackArrow,
-                        withConfirmButton = withConfirmButton,
-                        withCancelButton = withCancelButton,
+                        ctaButtonText = ctaButtonText,
                     )
                 }
             }
@@ -126,13 +127,11 @@ class KloudDialog : DialogFragment() {
             type: String,
             route: String? = null,
             title: String? = null,
-            body: String? = null,
+            message: String? = null,
             hideForeverMessage: String? = null,
+            ctaButtonText: String? = null,
             imageUrl: String? = null,
             imageRatio: Float? = null,
-            withBackArrow: Boolean? = false,
-            withConfirmButton: Boolean? = false,
-            withCancelButton: Boolean? = false,
             onClick: (String) -> Unit = {},
         ): KloudDialog {
             val dialog = KloudDialog()
@@ -141,64 +140,53 @@ class KloudDialog : DialogFragment() {
                 putString("type", type)
                 putString("route", route)
                 putString("title", title)
-                putString("body", body)
+                putString("message", message)
                 putString("hideForeverMessage", hideForeverMessage)
                 putString("imageUrl", imageUrl)
                 putFloat("imageRatio", imageRatio ?: 1f)
-                putBoolean("withBackArrow", withBackArrow ?: false)
-                putBoolean("withConfirmButton", withConfirmButton ?: false)
-                putBoolean("withCancelButton", withCancelButton ?: false)
+                putString("ctaButtonText", ctaButtonText)
             }
             dialog.onClick = onClick
             return dialog
         }
     }
 }
+
 @Composable
-private fun KloudDialogScreen(
+private fun ImageDialogScreen(
     id: String,
-    title: String? = null,
-    body: String? = null,
-    withBackArrow: Boolean = false,
-    withConfirmButton: Boolean = false,
-    withCancelButton: Boolean = false,
+    imageUrl: String,
+    imageRatio: Float,
+    ctaButtonText: String? = null,
     hideForeverMessage: String? = null,
-    imageUrl: String? = null,
-    imageRatio: Float? = null,
     onDismissRequest: () -> Unit,
     onClick: (String?) -> Unit,
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFEFEFEF))
-            .padding(vertical = 30.dp, horizontal = 20.dp),
-    ) {
-        if (withBackArrow) {
-            Image(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .padding(10.dp)
-                    .pointerInput(Unit) {
-                        detectTapGestures {
-                            onDismissRequest()
-                        }
-                    },
-                painter = painterResource(R.drawable.ic_close_black),
-                contentDescription = "Close Icon",
+    Column {
+        if (hideForeverMessage != null) {
+            HideForeverRow(
+                modifier = Modifier.align(Alignment.Start),
+                message = hideForeverMessage,
             )
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        if (!imageUrl.isNullOrEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color.White)
+                .padding(16.dp),
+        ) {
             AsyncImage(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .aspectRatio(imageRatio ?: 1f)
+                    .aspectRatio(imageRatio)
+                    .clip(RoundedCornerShape(12.dp))
                     .pointerInput(Unit) {
                         detectTapGestures {
+                            onDismissRequest()
                             onClick(id)
                         }
                     },
@@ -216,59 +204,42 @@ private fun KloudDialogScreen(
                 model = imageUrl,
                 contentDescription = "Dialog Image",
                 contentScale = ContentScale.Crop,
+                placeholder = painterResource(R.drawable.ic_logo),
             )
-        }
 
-
-        if (hideForeverMessage != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            HideForeverRow(
-                modifier = Modifier.align(Alignment.End),
-                message = hideForeverMessage,
-            )
-        }
-
-        if (!title.isNullOrEmpty()) {
-
-        }
-
-        if (!body.isNullOrEmpty()) {
-            Text(
-                text = body,
-                fontWeight = FontWeight.Normal,
-                textAlign = TextAlign.Center,
-                color = Color(0xFF86898C)
-            )
-        }
-        
-        if (withConfirmButton || withCancelButton) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                if (withCancelButton) {
-                    Button(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp),
-                        onClick = { onDismissRequest() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFFEFEFEF),
-                            contentColor = Color.Black
-                        ),
-                        shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("취소")
-                    }
-                }
-
-                if (withConfirmButton) {
-
+            if (!ctaButtonText.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    onClick = {
+                        onDismissRequest()
+                        onClick(id)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Black,
+                        contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(ctaButtonText)
                 }
             }
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Image(
+            modifier = Modifier
+                .size(44.dp)
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        onDismissRequest()
+                    }
+                }
+                .align(Alignment.CenterHorizontally),
+            painter = painterResource(R.drawable.ic_circle_close),
+            contentDescription = "Circle Close",
+        )
     }
 }
 
@@ -280,30 +251,28 @@ private fun HideForeverRow(
     val isHideForeverClicked = remember { mutableStateOf(false) }
     Row(
         modifier = modifier
+            .padding(start = 12.dp)
             .pointerInput(isHideForeverClicked.value) {
                 detectTapGestures {
                     isHideForeverClicked.value = !isHideForeverClicked.value
                 }
             },
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         Image(
             painter = painterResource(
                 when (isHideForeverClicked.value) {
-                    true -> R.drawable.ic_checkbox_filled
-                    false -> R.drawable.ic_checkbox_empty
-                }
-            ),
-            contentDescription = "Hide Forever Checkbox",
-        )
-        Text(
-            text = message,
-            color = when(isHideForeverClicked.value) {
-                true -> Color.Black
-                false -> Color(0xFF86898C)
-            },
-            fontWeight = if (isHideForeverClicked.value) FontWeight.Bold else null
+                    true -> R.drawable.ic_check_filled
+                    false -> R.drawable.ic_check
+                }),
+                contentDescription = "Hide Forever Checkbox",
+            )
+                    Text (
+                    text = message,
+            color = Color.White,
+            lineHeight = 20.sp,
+            fontWeight = FontWeight.Bold
         )
     }
 }
@@ -312,6 +281,7 @@ private fun HideForeverRow(
 private fun SimpleDialogScreen(
     id: String,
     title: String,
+    message: String?,
     onClick: (String) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -320,15 +290,23 @@ private fun SimpleDialogScreen(
             .fillMaxWidth()
             .clip(RoundedCornerShape(16.dp))
             .background(Color(0xFFEFEFEF))
-            .padding(top = 20.dp, bottom = 10.dp, start = 20.dp, end = 20.dp),
+            .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = title,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = Color.Black
+            color = Color.Black,
+            fontSize = 16.sp,
         )
+        if (!message.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                textAlign = TextAlign.Center,
+            )
+        }
         Spacer(modifier = Modifier.height(20.dp))
         Button(
             modifier = Modifier
@@ -351,11 +329,25 @@ private fun SimpleDialogScreen(
 
 @Preview
 @Composable
-private fun KloudSimpleDialogPreview() {
+private fun SimpleDialogPreview() {
     SimpleDialogScreen(
         id = "Simple",
         title = "이미 가입된 계정이 있습니다",
         onClick = {},
+        message = "와이파이 확인해 임마!",
         onDismissRequest = {},
     )
+}
+
+@Preview
+@Composable
+private fun ImageDialogPreview() {
+    ImageDialogScreen(
+        id = "Image",
+        imageUrl = "sdf",
+        imageRatio = 0.7f,
+        onDismissRequest = {},
+        ctaButtonText = "이벤트 바로가기",
+        hideForeverMessage = "오늘 하루 보지않기"
+    ) { }
 }
