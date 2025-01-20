@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Log
 import android.webkit.WebView
 import com.google.gson.Gson
+import com.worksd.blanc.data.KloudDialogInfo
 
 fun WebView.onKakaoLoginSuccess(activity: Activity, code: String) {
     activity.runOnUiThread {
@@ -41,13 +42,35 @@ fun WebView.onPaymentSuccess(activity: Activity, transactionId: String, paymentI
     }
 }
 
-fun WebView.onDialogConfirm(activity: Activity, id: String) {
+fun WebView.onDialogConfirm(activity: Activity, dialogInfo: KloudDialogInfo) {
     activity.runOnUiThread {
         Log.d("WebAppInterface", "onDialogConfirm")
         this.loadUrl(
             createJavaScriptFunction(
                 "onDialogConfirm",
-                mapOf("id" to id)
+                mapOf(
+                    "id" to dialogInfo.id,
+                    "type" to dialogInfo.type,
+                    "route" to dialogInfo.route,
+                    "hideForeverMessage" to dialogInfo.hideForeverMessage,
+                    "imageUrl" to dialogInfo.imageUrl,
+                    "imageRatio" to dialogInfo.imageRatio,
+                    "title" to dialogInfo.title,
+                    "message" to dialogInfo.message,
+                    "ctaButtonText" to dialogInfo.ctaButtonText,
+                )
+            )
+        )
+    }
+}
+
+fun WebView.onHideDialog(activity: Activity, dialogId: String, clicked: Boolean) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onHideDialogConfirm")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onHideDialogConfirm",
+                mapOf("id" to dialogId, "clicked" to clicked)
             )
         )
     }

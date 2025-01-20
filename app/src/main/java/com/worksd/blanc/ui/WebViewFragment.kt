@@ -22,6 +22,7 @@ import com.worksd.blanc.client.WebAppInterface
 import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.onDialogConfirm
 import com.worksd.blanc.client.onGoogleLoginSuccess
+import com.worksd.blanc.client.onHideDialog
 import com.worksd.blanc.client.onKakaoLoginSuccess
 import com.worksd.blanc.client.onPaymentSuccess
 import com.worksd.blanc.data.GoogleLoginConfiguration
@@ -37,6 +38,7 @@ import io.portone.sdk.android.payment.PaymentResponse
 import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.PaymentMethod
+import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -181,10 +183,17 @@ class WebViewFragment : Fragment() {
                                     hideForeverMessage = dialogInfo.hideForeverMessage,
                                     imageUrl = dialogInfo.imageUrl,
                                     imageRatio = dialogInfo.imageRatio,
-                                    onClick = { id ->
+                                    onClick = {
                                         binding.webView.onDialogConfirm(
                                             activity = requireActivity(),
-                                            id = id,
+                                            dialogInfo = it
+                                        )
+                                    },
+                                    onClickHideDialog = { id , clicked ->
+                                        binding.webView.onHideDialog(
+                                            activity = requireActivity(),
+                                            dialogId = id,
+                                            clicked = clicked,
                                         )
                                     },
                                     title = dialogInfo.title,
@@ -288,6 +297,10 @@ class WebViewFragment : Fragment() {
             type = KloudDialogType.SIMPLE.name,
             title = title,
             message = message,
+            onClickHideDialog = { id, clicked ->
+            },
+            onClick = {
+            }
         )
         dialog.show(childFragmentManager, "KloudDialog")
     }

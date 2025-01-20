@@ -46,6 +46,7 @@ import coil3.ImageLoader
 import coil3.compose.AsyncImage
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.worksd.blanc.R
+import com.worksd.blanc.data.KloudDialogInfo
 import okhttp3.OkHttpClient
 
 enum class KloudDialogType {
@@ -55,7 +56,8 @@ enum class KloudDialogType {
 
 class KloudDialog : DialogFragment() {
 
-    private var onClick: ((String) -> Unit)? = null
+    private var onClick: ((KloudDialogInfo) -> Unit)? = null
+    private var onClickHideDialog: ((String, Boolean) -> Unit)? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -79,7 +81,19 @@ class KloudDialog : DialogFragment() {
                         id = id,
                         title = title.orEmpty(),
                         onClick = {
-                            onClick?.invoke(it)
+                            onClick?.invoke(
+                                KloudDialogInfo(
+                                    id = id,
+                                    type = type,
+                                    route = route,
+                                    hideForeverMessage = hideForeverMessage,
+                                    imageUrl = imageUrl,
+                                    imageRatio = imageRatio,
+                                    title = title,
+                                    message = message,
+                                    ctaButtonText = ctaButtonText,
+                                )
+                            )
                         },
                         onDismissRequest = {
                             dismiss()
@@ -96,7 +110,22 @@ class KloudDialog : DialogFragment() {
                             dismiss()
                         },
                         onClick = {
-                            onClick?.invoke(route)
+                            onClick?.invoke(
+                                KloudDialogInfo(
+                                    id = id,
+                                    type = type,
+                                    route = route,
+                                    hideForeverMessage = hideForeverMessage,
+                                    imageUrl = imageUrl,
+                                    imageRatio = imageRatio,
+                                    title = title,
+                                    message = message,
+                                    ctaButtonText = ctaButtonText,
+                                )
+                            )
+                        },
+                        onClickHideDialog = { dialogId, isHideForever ->
+                            onClickHideDialog?.invoke(dialogId, isHideForever)
                         },
                         ctaButtonText = ctaButtonText,
                     )
@@ -132,7 +161,8 @@ class KloudDialog : DialogFragment() {
             ctaButtonText: String? = null,
             imageUrl: String? = null,
             imageRatio: Float? = null,
-            onClick: (String) -> Unit = {},
+            onClick: (KloudDialogInfo) -> Unit,
+            onClickHideDialog: (String, Boolean) -> Unit,
         ): KloudDialog {
             val dialog = KloudDialog()
             dialog.arguments = Bundle().apply {
@@ -147,6 +177,7 @@ class KloudDialog : DialogFragment() {
                 putString("ctaButtonText", ctaButtonText)
             }
             dialog.onClick = onClick
+            dialog.onClickHideDialog = onClickHideDialog
             return dialog
         }
     }
@@ -161,6 +192,7 @@ private fun ImageDialogScreen(
     hideForeverMessage: String? = null,
     onDismissRequest: () -> Unit,
     onClick: (String?) -> Unit,
+    onClickHideDialog: (String, Boolean) -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -169,6 +201,8 @@ private fun ImageDialogScreen(
             HideForeverRow(
                 modifier = Modifier.align(Alignment.Start),
                 message = hideForeverMessage,
+                onClickHideDialog = onClickHideDialog,
+                id = id,
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -246,7 +280,9 @@ private fun ImageDialogScreen(
 @Composable
 private fun HideForeverRow(
     modifier: Modifier = Modifier,
+    id: String,
     message: String,
+    onClickHideDialog: (String, Boolean) -> Unit,
 ) {
     val isHideForeverClicked = remember { mutableStateOf(false) }
     Row(
@@ -255,6 +291,7 @@ private fun HideForeverRow(
             .pointerInput(isHideForeverClicked.value) {
                 detectTapGestures {
                     isHideForeverClicked.value = !isHideForeverClicked.value
+                    onClickHideDialog(id, isHideForeverClicked.value)
                 }
             },
         verticalAlignment = Alignment.CenterVertically,
@@ -348,6 +385,8 @@ private fun ImageDialogPreview() {
         imageRatio = 0.7f,
         onDismissRequest = {},
         ctaButtonText = "이벤트 바로가기",
-        hideForeverMessage = "오늘 하루 보지않기"
-    ) { }
+        hideForeverMessage = "오늘 하루 보지않기",
+        onClick = {},
+        onClickHideDialog = { id, clicked -> }
+    )
 }
