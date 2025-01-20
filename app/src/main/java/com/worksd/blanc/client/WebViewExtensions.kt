@@ -53,6 +53,18 @@ fun WebView.onDialogConfirm(activity: Activity, id: String) {
     }
 }
 
+fun WebView.onErrorInvoked(activity: Activity, code: String) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onErrorInvoked")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onErrorInvoked",
+                mapOf("code" to code)
+            )
+        )
+    }
+}
+
 private fun createJavaScriptFunction(functionName: String, parameterMap: Any?): String {
     val paramJsonString = parameterMap?.let {
         Gson().toJson(parameterMap)

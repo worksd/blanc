@@ -47,6 +47,7 @@ class WebViewFragment : Fragment() {
     private val viewModel: MainViewModel by viewModels()
 
     private lateinit var binding: FragmentWebViewBinding
+    private var isLoading: Boolean = true
     private var toast: Toast? = null
 
     private val paymentActivityResultLauncher =
@@ -61,10 +62,6 @@ class WebViewFragment : Fragment() {
             }
 
             override fun onFail(response: PaymentResponse.Fail) {
-                AlertDialog.Builder(requireContext())
-                    .setTitle("결제 실패")
-                    .setMessage(response.toString())
-                    .show()
             }
         })
 
@@ -91,10 +88,15 @@ class WebViewFragment : Fragment() {
         route: String,
     ) {
         try {
-            viewModel.setLoading(true)
             lifecycleScope.launch {
                 delay(5000L)
-                viewModel.onConnectFail()
+                if (isLoading) {
+                    showSimpleDialog(
+                        title = "네트워크 연결 실패",
+                        message = "서버가 불안정합니다.\n잠시 후 다시 시도해주세요."
+                    )
+                    isLoading = false
+                }
             }
             binding.apply {
                 cookieManager.apply {
@@ -112,11 +114,15 @@ class WebViewFragment : Fragment() {
                         val customWebViewClient =
                             CustomWebViewClient(object : WebViewListener {
                                 override fun onConnectSuccess() {
-                                    viewModel.setLoading(false)
+                                    isLoading = false
                                 }
 
                                 override fun onConnectFail() {
 
+                                }
+
+                                override fun onPageFinished() {
+                                    cookieManager.flush()
                                 }
                             })
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
@@ -203,8 +209,14 @@ class WebViewFragment : Fragment() {
                 }
             }
         } catch (e: Exception) {
+            isLoading = false
             Log.d("WebAppInterface", "initWebView: $e")
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+
     }
 
     private fun navigate(route: String, withClear: Boolean = false) {
@@ -246,12 +258,6 @@ class WebViewFragment : Fragment() {
         lifecycleScope.launch {
             viewModel.errorInvoked.collect {
                 Log.d("WebAppInterface", "collectEvents: ${it.message}")
-            }
-        }
-
-        lifecycleScope.launch {
-            viewModel.isConnectFail.collect {
-                showSimpleDialog("네트워크 연결 실패", "서버가 불안정합니다.\n잠시 후 다시 시도해주세요.")
             }
         }
     }

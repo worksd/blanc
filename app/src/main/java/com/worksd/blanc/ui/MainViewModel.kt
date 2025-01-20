@@ -8,20 +8,13 @@ import com.worksd.blanc.data.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val loginRepository: LoginRepository,
-): ViewModel() {
-
-    private val _isLoading: MutableStateFlow<Boolean> = MutableStateFlow(true)
-    val isLoading: SharedFlow<Boolean> = _isLoading
-
-    private val _isConnectFail: MutableSharedFlow<Unit> = MutableSharedFlow()
-    val isConnectFail: SharedFlow<Unit> = _isConnectFail
+) : ViewModel() {
 
     private val _onKakaoLoginSuccess: MutableSharedFlow<String> = MutableSharedFlow()
     val onKakaoLoginSuccess: SharedFlow<String> = _onKakaoLoginSuccess
@@ -56,21 +49,4 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-
-    fun setLoading(isLoading: Boolean) {
-        viewModelScope.launch {
-            _isLoading.emit(true)
-        }
-    }
-
-    fun onConnectFail() {
-        viewModelScope.launch {
-            if (_isLoading.value) {
-                _isConnectFail.emit(Unit)
-                _isLoading.emit(false)
-            }
-        }
-    }
-
-
 }

@@ -26,6 +26,12 @@ class CustomWebViewClient(private val listener: WebViewListener) : WebViewClient
         listener.onConnectSuccess()
     }
 
+    override fun onPageFinished(view: WebView?, url: String?) {
+        super.onPageFinished(view, url)
+
+        listener.onPageFinished()
+    }
+
     override fun onReceivedError(
         view: WebView?,
         request: WebResourceRequest?,
