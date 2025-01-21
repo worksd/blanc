@@ -40,6 +40,7 @@ import io.portone.sdk.android.payment.PaymentRequest
 import io.portone.sdk.android.payment.PaymentResponse
 import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.Currency
+import io.portone.sdk.android.type.Customer
 import io.portone.sdk.android.type.PaymentMethod
 import javax.inject.Inject
 import kotlinx.coroutines.delay
@@ -59,6 +60,7 @@ class WebViewFragment : Fragment() {
         PortOne.registerForPaymentActivity(this, callback = object :
             PaymentCallback {
             override fun onSuccess(response: PaymentResponse.Success) {
+                Log.d("NativeLog", "onSuccess: $response")
                 binding.webView.onPaymentSuccess(
                     requireActivity(),
                     transactionId = response.txId,
@@ -195,30 +197,34 @@ class WebViewFragment : Fragment() {
 
                             override fun showDialog(dialogInfo: KloudDialogInfo) {
                                 Log.d("WebAppInterface", "showDialog: $dialogInfo")
-                                KloudDialog.newInstance(
-                                    id = dialogInfo.id.orEmpty(),
-                                    route = dialogInfo.route,
-                                    hideForeverMessage = dialogInfo.hideForeverMessage,
-                                    imageUrl = dialogInfo.imageUrl,
-                                    imageRatio = dialogInfo.imageRatio,
-                                    onClick = {
-                                        binding.webView.onDialogConfirm(
-                                            activity = requireActivity(),
-                                            dialogInfo = it
-                                        )
-                                    },
-                                    onClickHideDialog = { id , clicked ->
-                                        binding.webView.onHideDialog(
-                                            activity = requireActivity(),
-                                            dialogId = id,
-                                            clicked = clicked,
-                                        )
-                                    },
-                                    title = dialogInfo.title,
-                                    message = dialogInfo.message,
-                                    type = dialogInfo.type,
-                                    ctaButtonText = dialogInfo.ctaButtonText,
-                                ).show(childFragmentManager, "KloudDialog")
+                                try {
+                                    KloudDialog.newInstance(
+                                        id = dialogInfo.id.orEmpty(),
+                                        route = dialogInfo.route,
+                                        hideForeverMessage = dialogInfo.hideForeverMessage,
+                                        imageUrl = dialogInfo.imageUrl,
+                                        imageRatio = dialogInfo.imageRatio,
+                                        onClick = {
+                                            binding.webView.onDialogConfirm(
+                                                activity = requireActivity(),
+                                                dialogInfo = it
+                                            )
+                                        },
+                                        onClickHideDialog = { id, clicked ->
+                                            binding.webView.onHideDialog(
+                                                activity = requireActivity(),
+                                                dialogId = id,
+                                                clicked = clicked,
+                                            )
+                                        },
+                                        title = dialogInfo.title,
+                                        message = dialogInfo.message,
+                                        type = dialogInfo.type,
+                                        ctaButtonText = dialogInfo.ctaButtonText,
+                                    ).show(childFragmentManager, "KloudDialog")
+                                } catch (e: Throwable) {
+                                    Log.d("WebAppInterface", "showDialog: $e")
+                                }
                             }
 
                             override fun showBottomSheet(bottomSheetInfo: String) {
@@ -301,7 +307,10 @@ class WebViewFragment : Fragment() {
                     paymentId = paymentInfo.paymentId,
                     orderName = paymentInfo.orderName,
                     amount = Amount(total = paymentInfo.price, currency = Currency.KRW), // 금액
-                    method = PaymentMethod.Card() // 결제수단 관련 정보
+                    method = PaymentMethod.Card(), // 결제수단 관련 정보
+                    customer = Customer(
+                        id = paymentInfo.userId,
+                    )
                 ),
                 resultLauncher = paymentActivityResultLauncher
             )
