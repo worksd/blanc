@@ -1,7 +1,9 @@
 package com.worksd.blanc.util
 
+import android.content.Context
+
 object KloudWebUrlProvider {
-    fun getUrl(route: String): String {
-        return "http://192.168.45.244:3000$route"
+    fun getUrl(context: Context, route: String): String {
+        return "${PrefUtils(context).getString(WebEndPointKey).orEmpty()}$route"
     }
 }

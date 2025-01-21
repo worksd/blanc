@@ -8,7 +8,9 @@ import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
+import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
@@ -21,6 +23,7 @@ import com.worksd.blanc.client.EventReceiver
 import com.worksd.blanc.client.WebAppInterface
 import com.worksd.blanc.client.WebViewListener
 import com.worksd.blanc.client.onDialogConfirm
+import com.worksd.blanc.client.onErrorInvoked
 import com.worksd.blanc.client.onGoogleLoginSuccess
 import com.worksd.blanc.client.onHideDialog
 import com.worksd.blanc.client.onKakaoLoginSuccess
@@ -64,6 +67,9 @@ class WebViewFragment : Fragment() {
             }
 
             override fun onFail(response: PaymentResponse.Fail) {
+                onErrorInvoked(
+                    code = response.code,
+                )
             }
         })
 
@@ -113,6 +119,13 @@ class WebViewFragment : Fragment() {
                         displayZoomControls = false
                         allowContentAccess = true
                         domStorageEnabled = true
+                        val kloudWebChromeClient = object: WebChromeClient() {
+                            override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
+                                Log.d("WebAppInterface", "onConsoleMessage: ${consoleMessage?.message()}")
+                                return super.onConsoleMessage(consoleMessage)
+                            }
+                        }
+                        webChromeClient = kloudWebChromeClient
                         val customWebViewClient =
                             CustomWebViewClient(object : WebViewListener {
                                 override fun onConnectSuccess() {
@@ -120,7 +133,10 @@ class WebViewFragment : Fragment() {
                                 }
 
                                 override fun onConnectFail() {
-
+                                    showSimpleDialog(
+                                        title = "네트워크 연결 실패",
+                                        message = "서버가 불안정합니다.\n잠시 후 다시 시도해주세요."
+                                    )
                                 }
 
                                 override fun onPageFinished() {
@@ -152,6 +168,7 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun navigateMain(bootInfo: String) {
+                                Log.d("WebAppInterface", "navigateMain: $bootInfo")
                                 launchMainScreen(bootInfo)
                             }
 
@@ -168,6 +185,7 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun sendGoogleLogin(configuration: GoogleLoginConfiguration) {
+                                Log.d("WebAppInterface", "sendGoogleLogin: $configuration")
                                 viewModel.googleLogin(
                                     context = requireContext(),
                                     serverClientId = configuration.serverClientId,
@@ -213,7 +231,8 @@ class WebViewFragment : Fragment() {
                             }
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
-                        loadUrl(KloudWebUrlProvider.getUrl(route))
+                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
+//                        loadUrl("http://192.168.45.47:3000$route")
                     }
                 }
             }
@@ -305,8 +324,11 @@ class WebViewFragment : Fragment() {
         dialog.show(childFragmentManager, "KloudDialog")
     }
 
-    private fun onErrorInvoked() {
-
+    private fun onErrorInvoked(code: String) {
+        binding.webView.onErrorInvoked(
+            requireActivity(),
+            code = code,
+        )
     }
 
     companion object {

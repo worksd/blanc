@@ -4,58 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
-    <application
-        android:name=".BlancApplication"
-        android:allowBackup="true"
-        android:dataExtractionRules="@xml/data_extraction_rules"
-        android:fullBackupContent="@xml/backup_rules"
-        android:hardwareAccelerated="true"
-        android:icon="@drawable/ic_icon"
-        android:label="@string/app_name"
-        android:roundIcon="@drawable/ic_icon"
-        android:supportsRtl="true"
-        android:theme="@style/Theme.Blanc"
-        android:usesCleartextTraffic="true"
-        tools:targetApi="31">
-
-        <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Blanc" />
-
-        <activity
-            android:name=".ui.WebViewActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-
-        </activity>
-
-        <service
-            android:name=".service.FirebaseMessaging"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-
-        </service>
-
-        <activity
-            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="oauth"
-                    android:scheme="kakao198ee4b72a3466ab10d4b1ff27bbc695" />
-            </intent-filter>
-        </activity>
-    </application>
-
     <queries>
 
         <!-- 간편결제 -->
@@ -116,5 +64,59 @@
         <package android:name="com.kt.ktauth" /> <!-- PASS -->
         <package android:name="kr.danal.app.damoum" /> <!-- 다날 다모음 -->
     </queries>
+
+    <application
+        android:name=".BlancApplication"
+        android:allowBackup="true"
+        android:dataExtractionRules="@xml/data_extraction_rules"
+        android:fullBackupContent="@xml/backup_rules"
+        android:hardwareAccelerated="true"
+        android:icon="@drawable/ic_icon"
+        android:label="@string/app_name"
+        android:roundIcon="@drawable/ic_icon"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.Blanc"
+        android:usesCleartextTraffic="true"
+        tools:targetApi="31">
+        <activity
+            android:name=".ui.developer.DeveloperActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Blanc" />
+        <activity
+            android:name=".ui.WebViewActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".service.FirebaseMessaging"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+
+        <activity
+            android:name="com.kakao.sdk.auth.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="oauth"
+                    android:scheme="kakao198ee4b72a3466ab10d4b1ff27bbc695" />
+            </intent-filter>
+        </activity>
+    </application>
 
 </manifest>

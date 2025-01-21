@@ -80,21 +80,6 @@ class KloudDialog : DialogFragment() {
                     SimpleDialogScreen(
                         id = id,
                         title = title.orEmpty(),
-                        onClick = {
-                            onClick?.invoke(
-                                KloudDialogInfo(
-                                    id = id,
-                                    type = type,
-                                    route = route,
-                                    hideForeverMessage = hideForeverMessage,
-                                    imageUrl = imageUrl,
-                                    imageRatio = imageRatio,
-                                    title = title,
-                                    message = message,
-                                    ctaButtonText = ctaButtonText,
-                                )
-                            )
-                        },
                         onDismissRequest = {
                             dismiss()
                         },
@@ -319,7 +304,6 @@ private fun SimpleDialogScreen(
     id: String,
     title: String,
     message: String?,
-    onClick: (String) -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     Column(
@@ -351,7 +335,6 @@ private fun SimpleDialogScreen(
                 .height(48.dp),
             onClick = {
                 onDismissRequest()
-                onClick(id)
             },
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Black,
@@ -370,7 +353,6 @@ private fun SimpleDialogPreview() {
     SimpleDialogScreen(
         id = "Simple",
         title = "이미 가입된 계정이 있습니다",
-        onClick = {},
         message = "와이파이 확인해 임마!",
         onDismissRequest = {},
     )
