@@ -3,6 +3,10 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission
+        android:name="com.google.android.gms.permission.AD_ID"
+        tools:node="remove" />
+
 
     <queries>
 
@@ -117,6 +121,11 @@
                     android:scheme="kakao198ee4b72a3466ab10d4b1ff27bbc695" />
             </intent-filter>
         </activity>
+
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false" />
     </application>
+
 
 </manifest>
