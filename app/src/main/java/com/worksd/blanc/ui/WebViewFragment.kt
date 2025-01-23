@@ -99,7 +99,7 @@ class WebViewFragment : Fragment() {
     ) {
         try {
             lifecycleScope.launch {
-                delay(5000L)
+                delay(7000L)
                 if (isLoading) {
                     showSimpleDialog(
                         title = "네트워크 연결 실패",
@@ -135,10 +135,7 @@ class WebViewFragment : Fragment() {
                                 }
 
                                 override fun onConnectFail() {
-                                    showSimpleDialog(
-                                        title = "네트워크 연결 실패",
-                                        message = "서버가 불안정합니다.\n잠시 후 다시 시도해주세요."
-                                    )
+
                                 }
 
                                 override fun onPageFinished() {
@@ -238,7 +235,7 @@ class WebViewFragment : Fragment() {
                         }), "KloudEvent")
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
-//                        loadUrl("http://192.168.45.47:3000$route")
+//                        loadUrl("http://192.168.45.154:3000$route")
                     }
                 }
             }
