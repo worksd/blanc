@@ -12,7 +12,6 @@ import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.widget.Toast
-import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -42,7 +41,6 @@ import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.Customer
 import io.portone.sdk.android.type.PaymentMethod
-import javax.inject.Inject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -233,9 +231,17 @@ class WebViewFragment : Fragment() {
                                 requestPayment(paymentInfo)
                             }
                         }), "KloudEvent")
-                        webViewClient = customWebViewClient
+
+                        val pInfo =
+                                context.packageManager.getPackageInfo(context.packageName, 0)
+                        val version = pInfo.versionName
+
+                        val newUserAgent = "${settings.userAgentString} KloudNativeClient/${version}"
+                        settings.userAgentString = newUserAgent
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
-//                        loadUrl("http://192.168.45.154:3000$route")
+                        webViewClient = customWebViewClient
+//                        loadUrl("http://192.168.45.138:3000$route")
+
                     }
                 }
             }
