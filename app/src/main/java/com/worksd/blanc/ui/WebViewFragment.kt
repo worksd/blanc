@@ -306,7 +306,7 @@ class WebViewFragment : Fragment() {
                     amount = Amount(total = paymentInfo.price, currency = Currency.KRW), // 금액
                     method = PaymentMethod.Card(), // 결제수단 관련 정보
                     customer = Customer(
-                        id = paymentInfo.userId,
+                        name = Customer.Name.Full(paymentInfo.userId),
                     )
                 ),
                 resultLauncher = paymentActivityResultLauncher
