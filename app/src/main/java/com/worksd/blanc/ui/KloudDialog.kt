@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,6 +53,7 @@ import okhttp3.OkHttpClient
 enum class KloudDialogType {
     SIMPLE,
     IMAGE,
+    YESORNO,
 }
 
 class KloudDialog : DialogFragment() {
@@ -113,6 +115,30 @@ class KloudDialog : DialogFragment() {
                             onClickHideDialog?.invoke(dialogId, isHideForever)
                         },
                         ctaButtonText = ctaButtonText,
+                    )
+                } else if (type == KloudDialogType.YESORNO.name) {
+                    YesOrNoDialogScreen(
+                        id = id,
+                        title = title.orEmpty(),
+                        message = message,
+                        onConfirm = {
+                            onClick?.invoke(
+                                KloudDialogInfo(
+                                    id = id,
+                                    type = type,
+                                    route = route,
+                                    hideForeverMessage = hideForeverMessage,
+                                    imageUrl = imageUrl,
+                                    imageRatio = imageRatio,
+                                    title = title,
+                                    message = message,
+                                    ctaButtonText = ctaButtonText,
+                                )
+                            )
+                        },
+                        onDismissRequest = {
+                            dismiss()
+                        },
                     )
                 }
             }
@@ -332,7 +358,7 @@ private fun SimpleDialogScreen(
         Button(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp),
+                .height(54.dp),
             onClick = {
                 onDismissRequest()
             },
@@ -347,6 +373,75 @@ private fun SimpleDialogScreen(
     }
 }
 
+@Composable
+private fun YesOrNoDialogScreen(
+    id: String,
+    title: String,
+    message: String?,
+    onConfirm: () -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFEFEFEF))
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = title,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center,
+            color = Color.Black,
+            fontSize = 16.sp,
+        )
+        if (!message.isNullOrEmpty()) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = message,
+                textAlign = TextAlign.Center,
+            )
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp)
+                    .border(1.dp, Color(0xFFECEEF1), RoundedCornerShape(8.dp)),
+                onClick = {
+                    onDismissRequest()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("취소")
+            }
+            Button(
+                modifier = Modifier
+                    .weight(1f)
+                    .height(54.dp),
+                onClick = {
+                    onConfirm()
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(8.dp)
+            ) {
+                Text("확인")
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun SimpleDialogPreview() {
@@ -357,6 +452,19 @@ private fun SimpleDialogPreview() {
         onDismissRequest = {},
     )
 }
+
+@Preview
+@Composable
+private fun YesOrNoDialogPreview() {
+    YesOrNoDialogScreen(
+        id = "Simple",
+        title = "이미 가입된 계정이 있습니다",
+        message = "와이파이 확인해 임마!",
+        onConfirm = {},
+        onDismissRequest = {},
+    )
+}
+
 
 @Preview
 @Composable
