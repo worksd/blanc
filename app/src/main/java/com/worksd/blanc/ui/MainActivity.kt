@@ -46,9 +46,9 @@ class MainActivity : AppCompatActivity() {
         val bootInfo = Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
         lifecycleScope.launch {
             addMainFragment(bootInfo.bottomMenuList)
-            if (bootInfo.pushRoute != null) {
+            if (bootInfo.route != null) {
                 val intent = Intent(this@MainActivity, WebViewActivity::class.java)
-                intent.putExtra("route", bootInfo.pushRoute)
+                intent.putExtra("route", bootInfo.route)
                 startActivity(intent)
             }
         }

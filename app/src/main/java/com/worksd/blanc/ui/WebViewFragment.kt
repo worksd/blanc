@@ -238,9 +238,9 @@ class WebViewFragment : Fragment() {
 
                         val newUserAgent = "${settings.userAgentString} KloudNativeClient/${version}"
                         settings.userAgentString = newUserAgent
-                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
                         webViewClient = customWebViewClient
-//                        loadUrl("http://192.168.45.138:3000$route")
+                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
+//                        loadUrl("http://192.168.45.43:3000$route")
 
                     }
                 }

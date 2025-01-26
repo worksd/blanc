@@ -8,9 +8,7 @@ data class BootInfoResponse(
     @SerializedName("bottomMenuList")
     val bottomMenuList: List<BottomMenuResponse>,
     @SerializedName("route")
-    val route: String,
-    @SerializedName("pushRoute")
-    val pushRoute: String?,
+    val route: String?,
 )
 
 @Keep
