@@ -7,14 +7,14 @@ plugins {
 }
 
 android {
-    namespace = "com.worksd.blanc"
+    namespace = "com.rawgraphy.blanc"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.worksd.blanc"
+        applicationId = "com.rawgraphy.blanc"
         minSdk = 26
         targetSdk = 34
-        versionCode = 10
+        versionCode = 1
         versionName = "1.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
