@@ -88,6 +88,18 @@ fun WebView.onErrorInvoked(activity: Activity, code: String) {
     }
 }
 
+fun WebView.onFcmTokenComplete(activity: Activity, fcmToken: String, udid: String) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onFcmTokenComplete")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onFcmTokenComplete",
+                mapOf("fcmToken" to fcmToken, "udid" to udid)
+            )
+        )
+    }
+}
+
 private fun createJavaScriptFunction(functionName: String, parameterMap: Any?): String {
     val paramJsonString = parameterMap?.let {
         Gson().toJson(parameterMap)

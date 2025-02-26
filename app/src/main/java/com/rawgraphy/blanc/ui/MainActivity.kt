@@ -24,15 +24,11 @@ import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-
-    private val TAG = "DORODORO"
-
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        initFirebaseMessaging()
         askNotificationPermission()
 
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
@@ -49,21 +45,6 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
-    private fun initFirebaseMessaging() {
-
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w(TAG, "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-
-            // Get new FCM registration token
-            val token = task.result
-            Log.d(TAG, "Firebase Token = ${token}")
-        })
-    }
-
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->

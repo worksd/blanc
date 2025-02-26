@@ -7,6 +7,7 @@ interface EventReceiver {
     fun replace(route: String)
     fun push(route: String)
     fun showToast(message: String)
+    fun fullSheet(route: String)
     fun navigateMain(bootInfo: String)
     fun pushAndAllClear(route: String)
     fun back()
@@ -17,4 +18,5 @@ interface EventReceiver {
     fun showDialog(dialogInfo: KloudDialogInfo)
     fun showBottomSheet(bottomSheetInfo: String)
     fun requestPayment(command: String)
+    fun sendFcmToken()
 }

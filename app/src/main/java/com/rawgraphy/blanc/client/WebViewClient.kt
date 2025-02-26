@@ -66,6 +66,11 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
+    fun fullSheet(screen: String) {
+        receiver.fullSheet(screen)
+    }
+
+    @JavascriptInterface
     fun back() {
         receiver.back()
     }
@@ -120,5 +125,10 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun requestPayment(command: String) {
         receiver.requestPayment(command)
+    }
+
+    @JavascriptInterface
+    fun registerDevice() {
+        receiver.sendFcmToken()
     }
 }

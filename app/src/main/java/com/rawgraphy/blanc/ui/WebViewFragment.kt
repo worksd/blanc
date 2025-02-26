@@ -3,6 +3,7 @@ package com.rawgraphy.blanc.ui
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -15,6 +16,8 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.client.CustomWebViewClient
@@ -23,6 +26,7 @@ import com.rawgraphy.blanc.client.WebAppInterface
 import com.rawgraphy.blanc.client.WebViewListener
 import com.rawgraphy.blanc.client.onDialogConfirm
 import com.rawgraphy.blanc.client.onErrorInvoked
+import com.rawgraphy.blanc.client.onFcmTokenComplete
 import com.rawgraphy.blanc.client.onGoogleLoginSuccess
 import com.rawgraphy.blanc.client.onHideDialog
 import com.rawgraphy.blanc.client.onKakaoLoginSuccess
@@ -91,6 +95,25 @@ class WebViewFragment : Fragment() {
         collectEvents()
     }
 
+    @SuppressLint("HardwareIds")
+    private fun sendFcmToken() {
+        lifecycleScope.launch {
+            delay(3000L)
+            FirebaseMessaging.getInstance().token.addOnCompleteListener(
+                OnCompleteListener { task ->
+                    if (!task.isSuccessful) {
+                        return@OnCompleteListener
+                    }
+                    val token = task.result
+                    val udid = Settings.Secure.getString(
+                        requireContext().contentResolver,
+                        Settings.Secure.ANDROID_ID
+                    )
+                    binding.webView.onFcmTokenComplete(requireActivity(), token, udid)
+                })
+        }
+    }
+
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(
         route: String,
@@ -153,11 +176,15 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun push(route: String) {
-                                navigate(route)
+                                navigate(route, withClear = false, withBottomUp = false)
+                            }
+
+                            override fun fullSheet(route: String) {
+                                navigate(route, withClear = false, withBottomUp = true)
                             }
 
                             override fun pushAndAllClear(route: String) {
-                                navigate(route, true)
+                                navigate(route, withClear = true, withBottomUp = true)
                             }
 
                             override fun back() {
@@ -230,6 +257,27 @@ class WebViewFragment : Fragment() {
                                 val paymentInfo = Gson().fromJson(command, PaymentInfo::class.java)
                                 requestPayment(paymentInfo)
                             }
+
+                            @SuppressLint("HardwareIds")
+                            override fun sendFcmToken() {
+                                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+                                    if (!task.isSuccessful) {
+                                        return@OnCompleteListener
+                                    }
+
+                                    // Get new FCM registration token
+                                    val token = task.result
+                                    binding.webView.onFcmTokenComplete(
+                                        requireActivity(),
+                                        fcmToken = token,
+                                        udid = Settings.Secure.getString(
+                                            requireContext().contentResolver,
+                                            Settings.Secure.ANDROID_ID
+                                        )
+                                    )
+                                })
+                            }
+
                         }), "KloudEvent")
 
                         val pInfo =
@@ -240,7 +288,7 @@ class WebViewFragment : Fragment() {
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
-//                        loadUrl("http://192.168.45.43:3000$route")
+//                        loadUrl("http://192.168.0.134:3000$route")
 
                     }
                 }
@@ -251,12 +299,7 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-
-    }
-
-    private fun navigate(route: String, withClear: Boolean = false) {
+    private fun navigate(route: String, withClear: Boolean, withBottomUp: Boolean) {
         val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
             if (withClear) {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -264,9 +307,8 @@ class WebViewFragment : Fragment() {
         }
         intent.putExtra("route", route)
         startActivity(intent)
-        if (withClear) {
-            requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.slide_out_down)
-
+        if (withBottomUp) {
+            requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
         }
     }
 
