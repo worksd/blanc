@@ -13,6 +13,7 @@ import android.webkit.ConsoleMessage
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -36,6 +37,8 @@ import com.rawgraphy.blanc.data.KloudDialogInfo
 import com.rawgraphy.blanc.data.PaymentInfo
 import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
 import com.rawgraphy.blanc.util.KloudWebUrlProvider
+import com.rawgraphy.blanc.util.PrefUtils
+import com.rawgraphy.blanc.util.WebEndPointKey
 import dagger.hilt.android.AndroidEntryPoint
 import io.portone.sdk.android.PortOne
 import io.portone.sdk.android.payment.PaymentCallback
@@ -53,6 +56,14 @@ class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance() }
     private val viewModel: MainViewModel by viewModels()
+    private lateinit var bottomSheet: KloudBottomSheetFragment
+
+    private val backPressedCallback = object : OnBackPressedCallback(true) {
+        override fun handleOnBackPressed() {
+            isEnabled = false  // 콜백 비활성화
+            requireActivity().onBackPressedDispatcher.onBackPressed()
+        }
+    }
 
     private lateinit var binding: FragmentWebViewBinding
     private var isLoading: Boolean = true
@@ -90,9 +101,16 @@ class WebViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         initWebView(
-            route = requireArguments().getString(ARG_ROUTE).orEmpty(),
+            pageRoute = requireArguments().getString(ARG_ROUTE).orEmpty(),
         )
         collectEvents()
+
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            backPressedCallback
+        )
+
+        Log.d("WebViewFragment", "onViewCreated: $tag")
     }
 
     @SuppressLint("HardwareIds")
@@ -116,7 +134,7 @@ class WebViewFragment : Fragment() {
 
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(
-        route: String,
+        pageRoute: String,
     ) {
         try {
             lifecycleScope.launch {
@@ -176,15 +194,15 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun push(route: String) {
-                                navigate(route, withClear = false, withBottomUp = false)
+                                navigate(route, withBottomUp = false)
                             }
 
                             override fun fullSheet(route: String) {
-                                navigate(route, withClear = false, withBottomUp = true)
+                                navigate(route, withBottomUp = true)
                             }
 
                             override fun pushAndAllClear(route: String) {
-                                navigate(route, withClear = true, withBottomUp = true)
+                                clearAndPush(route)
                             }
 
                             override fun back() {
@@ -243,14 +261,32 @@ class WebViewFragment : Fragment() {
                                         message = dialogInfo.message,
                                         type = dialogInfo.type,
                                         ctaButtonText = dialogInfo.ctaButtonText,
+                                        confirmTitle = dialogInfo.confirmTitle,
+                                        cancelTitle = dialogInfo.cancelTitle
                                     ).show(childFragmentManager, "KloudDialog")
                                 } catch (e: Throwable) {
                                     Log.d("WebAppInterface", "showDialog: $e")
                                 }
                             }
 
-                            override fun showBottomSheet(bottomSheetInfo: String) {
-                                TODO("Not yet implemented")
+                            override fun showBottomSheet(route: String) {
+                                Log.d("WebViewFragment", "show bottom sheet $pageRoute")
+                                bottomSheet = KloudBottomSheetFragment.newInstance(route)
+                                bottomSheet.show(childFragmentManager, "KloudBottomSheet")
+                            }
+
+                            override fun closeBottomSheet() {
+                                Log.d("WebViewFragment", "close bottom sheet $pageRoute")
+                                try {
+                                    val dialog = parentFragment as? KloudBottomSheetFragment
+                                    dialog?.let { sheet ->
+                                        if (sheet.isAdded && !sheet.isRemoving) {
+                                            sheet.dismiss()
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e("WebViewFragment", "closeBottomSheet error: ${e.message}")
+                                }
                             }
 
                             override fun requestPayment(command: String) {
@@ -278,6 +314,10 @@ class WebViewFragment : Fragment() {
                                 })
                             }
 
+                            override fun changeWebEndpoint(endpoint: String) {
+                                PrefUtils(context).setString(WebEndPointKey, endpoint)
+                            }
+
                         }), "KloudEvent")
 
                         val pInfo =
@@ -287,8 +327,8 @@ class WebViewFragment : Fragment() {
                         val newUserAgent = "${settings.userAgentString} KloudNativeClient/${version}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
-                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), route))
-//                        loadUrl("http://192.168.0.134:3000$route")
+                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
+//                        loadUrl("http://192.168.45.65:3000$pageRoute")
 
                     }
                 }
@@ -299,17 +339,22 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    private fun navigate(route: String, withClear: Boolean, withBottomUp: Boolean) {
-        val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
-            if (withClear) {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            }
-        }
+    private fun navigate(route: String, withBottomUp: Boolean) {
+        val intent = Intent(requireActivity(), WebViewActivity::class.java)
         intent.putExtra("route", route)
         startActivity(intent)
         if (withBottomUp) {
             requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
         }
+    }
+
+    private fun clearAndPush(route: String) {
+        val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        intent.putExtra("route", route)
+        startActivity(intent)
+        requireActivity().overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
     }
 
     private fun launchMainScreen(bootInfo: String) {

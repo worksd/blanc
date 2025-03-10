@@ -22,5 +22,9 @@ data class KloudDialogInfo(
     @SerializedName("message")
     val message: String?,
     @SerializedName("ctaButtonText")
-    val ctaButtonText: String?
+    val ctaButtonText: String?,
+    @SerializedName("confirmTitle")
+    val confirmTitle: String?,
+    @SerializedName("cancelTitle")
+    val cancelTitle: String?,
 )

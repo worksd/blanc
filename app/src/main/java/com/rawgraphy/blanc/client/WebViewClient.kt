@@ -118,8 +118,8 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
-    fun showBottomSheet(bottomSheetInfo: String) {
-        receiver.showBottomSheet(bottomSheetInfo)
+    fun showBottomSheet(route: String) {
+        receiver.showBottomSheet(route)
     }
 
     @JavascriptInterface
@@ -130,5 +130,15 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun registerDevice() {
         receiver.sendFcmToken()
+    }
+
+    @JavascriptInterface
+    fun closeBottomSheet() {
+        receiver.closeBottomSheet()
+    }
+
+    @JavascriptInterface
+    fun changeWebEndpoint(endpoint: String) {
+        receiver.changeWebEndpoint(endpoint)
     }
 }

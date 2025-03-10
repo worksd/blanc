@@ -74,6 +74,8 @@ class KloudDialog : DialogFragment() {
         val message = requireArguments().getString("message")
         val type = requireArguments().getString("type")
         val ctaButtonText = requireArguments().getString("ctaButtonText")
+        val confirmTitle = requireArguments().getString("confirmTitle")
+        val cancelTitle = requireArguments().getString("cancelTitle")
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -85,6 +87,7 @@ class KloudDialog : DialogFragment() {
                             dismiss()
                         },
                         message = message,
+                        confirmTitle = confirmTitle.orEmpty(),
                     )
                 } else if (type == KloudDialogType.IMAGE.name) {
                     ImageDialogScreen(
@@ -107,6 +110,8 @@ class KloudDialog : DialogFragment() {
                                     title = title,
                                     message = message,
                                     ctaButtonText = ctaButtonText,
+                                    confirmTitle = confirmTitle,
+                                    cancelTitle = cancelTitle,
                                 )
                             )
                         },
@@ -132,12 +137,16 @@ class KloudDialog : DialogFragment() {
                                     title = title,
                                     message = message,
                                     ctaButtonText = ctaButtonText,
+                                    confirmTitle = confirmTitle,
+                                    cancelTitle = cancelTitle,
                                 )
                             )
                         },
                         onDismissRequest = {
                             dismiss()
                         },
+                        confirmTitle = confirmTitle.orEmpty(),
+                        cancelTitle = cancelTitle.orEmpty(),
                     )
                 }
             }
@@ -171,6 +180,8 @@ class KloudDialog : DialogFragment() {
             ctaButtonText: String? = null,
             imageUrl: String? = null,
             imageRatio: Float? = null,
+            confirmTitle: String? = null,
+            cancelTitle: String? = null,
             onClick: (KloudDialogInfo) -> Unit,
             onClickHideDialog: (String, Boolean) -> Unit,
         ): KloudDialog {
@@ -185,6 +196,8 @@ class KloudDialog : DialogFragment() {
                 putString("imageUrl", imageUrl)
                 putFloat("imageRatio", imageRatio ?: 1f)
                 putString("ctaButtonText", ctaButtonText)
+                putString("confirmTitle", confirmTitle)
+                putString("cancelTitle", cancelTitle)
             }
             dialog.onClick = onClick
             dialog.onClickHideDialog = onClickHideDialog
@@ -329,6 +342,7 @@ private fun SimpleDialogScreen(
     id: String,
     title: String,
     message: String?,
+    confirmTitle: String,
     onDismissRequest: () -> Unit,
 ) {
     Column(
@@ -367,7 +381,7 @@ private fun SimpleDialogScreen(
             ),
             shape = RoundedCornerShape(8.dp)
         ) {
-            Text("확인")
+            Text(confirmTitle)
         }
     }
 }
@@ -377,6 +391,8 @@ private fun YesOrNoDialogScreen(
     id: String,
     title: String,
     message: String?,
+    confirmTitle: String,
+    cancelTitle: String,
     onConfirm: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
@@ -420,7 +436,7 @@ private fun YesOrNoDialogScreen(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("취소")
+                Text(cancelTitle)
             }
             Button(
                 modifier = Modifier
@@ -435,7 +451,7 @@ private fun YesOrNoDialogScreen(
                 ),
                 shape = RoundedCornerShape(8.dp)
             ) {
-                Text("확인")
+                Text(confirmTitle)
             }
         }
     }
@@ -449,6 +465,7 @@ private fun SimpleDialogPreview() {
         title = "이미 가입된 계정이 있습니다",
         message = "와이파이 확인해 임마!",
         onDismissRequest = {},
+        confirmTitle = "확인",
     )
 }
 
@@ -461,6 +478,8 @@ private fun YesOrNoDialogPreview() {
         message = "와이파이 확인해 임마!",
         onConfirm = {},
         onDismissRequest = {},
+        confirmTitle = "확인",
+        cancelTitle = "취소",
     )
 }
 

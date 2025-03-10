@@ -23,7 +23,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.databinding.ActivityWebViewBinding
-import com.rawgraphy.blanc.ui.developer.DeveloperActivity
 import dagger.hilt.android.AndroidEntryPoint
 import java.security.MessageDigest
 import java.security.NoSuchAlgorithmException
@@ -80,24 +79,13 @@ class WebViewActivity : AppCompatActivity() {
 
     private fun loadSplashScreen() {
         binding.splashScreen.setContent {
-            SplashScreen(
-                startDevelopMode = {
-                    val intent = Intent(this, DeveloperActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                }
-            )
+            SplashScreen()
         }
     }
 }
 
 @Composable
-private fun SplashScreen(
-    startDevelopMode: () -> Unit,
-) {
-    val clickCount = remember { mutableStateOf(0) }
-    val lastClickTime = remember { mutableStateOf(0L) }
-
+private fun SplashScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -105,22 +93,6 @@ private fun SplashScreen(
         contentAlignment = Alignment.Center,
     ) {
         Image(
-            modifier = Modifier.pointerInput(Unit) {
-                detectTapGestures {
-                    val currentTime = System.currentTimeMillis()
-                    if (currentTime - lastClickTime.value < 1000) {
-                        clickCount.value++
-                        if (clickCount.value >= 5) {
-                            startDevelopMode()
-                            clickCount.value = 0
-                        }
-                    } else {
-                        clickCount.value = 1
-                    }
-
-                    lastClickTime.value = currentTime
-                }
-            },
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = "Logo",
         )
@@ -130,5 +102,5 @@ private fun SplashScreen(
 @Preview
 @Composable
 private fun SplashScreenPreview() {
-    SplashScreen({})
+    SplashScreen()
 }

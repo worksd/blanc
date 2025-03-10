@@ -16,7 +16,9 @@ interface EventReceiver {
     fun sendKakaoLogin()
     fun sendGoogleLogin(configuration: GoogleLoginConfiguration)
     fun showDialog(dialogInfo: KloudDialogInfo)
-    fun showBottomSheet(bottomSheetInfo: String)
     fun requestPayment(command: String)
     fun sendFcmToken()
+    fun showBottomSheet(route: String)
+    fun closeBottomSheet()
+    fun changeWebEndpoint(endpoint: String)
 }
