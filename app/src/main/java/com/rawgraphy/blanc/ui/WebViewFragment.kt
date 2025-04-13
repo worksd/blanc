@@ -39,6 +39,7 @@ import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
 import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
+import com.rawgraphy.blanc.util.refreshWebView
 import dagger.hilt.android.AndroidEntryPoint
 import io.portone.sdk.android.PortOne
 import io.portone.sdk.android.payment.PaymentCallback
@@ -100,8 +101,9 @@ class WebViewFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val route = requireArguments().getString(ARG_ROUTE).orEmpty()
         initWebView(
-            pageRoute = requireArguments().getString(ARG_ROUTE).orEmpty(),
+            pageRoute = route,
         )
         collectEvents()
 
@@ -109,8 +111,21 @@ class WebViewFragment : Fragment() {
             viewLifecycleOwner,
             backPressedCallback
         )
+        collectRefreshEvent(route)
 
         Log.d("WebViewFragment", "onViewCreated: $tag")
+    }
+
+    private fun collectRefreshEvent(route: String) {
+        lifecycleScope.launch {
+            refreshWebView.collect { endpoints ->
+                val shouldRefresh = endpoints.any { route.startsWith(it) }
+                if (shouldRefresh) {
+                    binding.webView.reload()
+                    Log.d("FirebaseMessaging", "collectRefreshEvent: $route")
+                }
+            }
+        }
     }
 
     @SuppressLint("HardwareIds")

@@ -11,13 +11,21 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.ui.WebViewActivity
+import com.rawgraphy.blanc.util.refreshWebView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 
 class FirebaseMessaging : FirebaseMessagingService() {
+
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
 
-        Log.d("DORODORO", "New Token: $token")
+        Log.d("FirebaseMessaging", "New Token: $token")
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
@@ -26,7 +34,17 @@ class FirebaseMessaging : FirebaseMessagingService() {
         val title = message.notification?.title ?: message.data["title"].orEmpty()
         val body = message.notification?.body ?: message.data["body"].orEmpty()
         val route = message.data["route"].orEmpty()
+        val hideNotification = message.data["hideNotification"].orEmpty()
+        val endpointsToRefresh = message.data["endpointsToRefresh"].orEmpty().split(',')
 
+        if (endpointsToRefresh.isNotEmpty()) {
+            serviceScope.launch {
+                refreshWebView.emit(endpointsToRefresh)
+            }
+        }
+
+        Log.d("FirebaseMessaging", "title = $title, body = $body route = $route, hideNotification = $hideNotification")
+        if (hideNotification == "true") return
         // Intent 생성
         val intent = Intent(this, WebViewActivity::class.java).apply {
             putExtra("route", route)

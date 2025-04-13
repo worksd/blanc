@@ -83,18 +83,34 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name=".ui.MainActivity"
-            android:exported="true"
-            android:theme="@style/Theme.Blanc" />
-        <activity
             android:name=".ui.WebViewActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.Blanc"
+            android:launchMode="singleTask">
+
+            <intent-filter android:autoVerify="true">  <!-- 자동 인증 추가 -->
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="https"/>
+                <data android:host="rawgraphy.com"/>
+                <data android:host="www.rawgraphy.com"/>
+                <data android:host="staging.rawgraphy.com"/>
+                <data android:host="www.staging.rawgraphy.com"/>
+                <data android:pathPrefix="/"/>
+            </intent-filter>
+
+        </activity>
+
 
         <service
             android:name=".service.FirebaseMessaging"

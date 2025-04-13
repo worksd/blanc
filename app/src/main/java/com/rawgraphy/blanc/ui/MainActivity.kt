@@ -35,16 +35,30 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val bootInfo = Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
-        lifecycleScope.launch {
-            addMainFragment(bootInfo.bottomMenuList)
-            if (!bootInfo.route.isNullOrEmpty()) {
-                val intent = Intent(this@MainActivity, WebViewActivity::class.java)
-                intent.putExtra("route", bootInfo.route)
-                startActivity(intent)
+        if (bootInfo != null) {
+            lifecycleScope.launch {
+                addMainFragment(bootInfo.bottomMenuList)
+                if (!bootInfo.route.isNullOrEmpty()) {
+                    val intent = Intent(this@MainActivity, WebViewActivity::class.java)
+                    intent.putExtra("route", bootInfo.route)
+                    startActivity(intent)
+                }
             }
         }
-
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val path = intent.data?.pathSegments?.joinToString("/", prefix = "/").toString()
+        navigate(path)
+    }
+
+    private fun navigate(route: String) {
+        val intent = Intent(this, WebViewActivity::class.java)
+        intent.putExtra("route", route)
+        startActivity(intent)
+    }
+
     private val requestPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission(),
     ) { isGranted: Boolean ->
