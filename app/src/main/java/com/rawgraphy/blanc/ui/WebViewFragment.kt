@@ -318,14 +318,18 @@ class WebViewFragment : Fragment() {
 
                                     // Get new FCM registration token
                                     val token = task.result
-                                    binding.webView.onFcmTokenComplete(
-                                        requireActivity(),
-                                        fcmToken = token,
-                                        udid = Settings.Secure.getString(
-                                            requireContext().contentResolver,
-                                            Settings.Secure.ANDROID_ID
+                                    try {
+                                        binding.webView.onFcmTokenComplete(
+                                            requireActivity(),
+                                            fcmToken = token,
+                                            udid = Settings.Secure.getString(
+                                                requireContext().contentResolver,
+                                                Settings.Secure.ANDROID_ID
+                                            )
                                         )
-                                    )
+                                    } catch (e: Exception) {
+                                        Log.d("WebAppInterface", "sendFcmToken: $e")
+                                    }
                                 })
                             }
 

@@ -81,12 +81,28 @@ class KloudDialog : DialogFragment() {
             setContent {
                 if (type == KloudDialogType.SIMPLE.name) {
                     SimpleDialogScreen(
-                        id = id,
                         title = title.orEmpty(),
                         onDismissRequest = {
                             dismiss()
                         },
                         message = message,
+                        onClick = {
+                            onClick?.invoke(
+                                KloudDialogInfo(
+                                    id = id,
+                                    type = type,
+                                    route = route,
+                                    hideForeverMessage = hideForeverMessage,
+                                    imageUrl = imageUrl,
+                                    imageRatio = imageRatio,
+                                    title = title,
+                                    message = message,
+                                    ctaButtonText = ctaButtonText,
+                                    confirmTitle = confirmTitle,
+                                    cancelTitle = cancelTitle,
+                                )
+                            )
+                        },
                         confirmTitle = confirmTitle.orEmpty(),
                     )
                 } else if (type == KloudDialogType.IMAGE.name) {
@@ -122,7 +138,6 @@ class KloudDialog : DialogFragment() {
                     )
                 } else if (type == KloudDialogType.YESORNO.name) {
                     YesOrNoDialogScreen(
-                        id = id,
                         title = title.orEmpty(),
                         message = message,
                         onConfirm = {
@@ -339,10 +354,10 @@ private fun HideForeverRow(
 
 @Composable
 private fun SimpleDialogScreen(
-    id: String,
     title: String,
     message: String?,
     confirmTitle: String,
+    onClick: () -> Unit,
     onDismissRequest: () -> Unit,
 ) {
     Column(
@@ -373,6 +388,7 @@ private fun SimpleDialogScreen(
                 .fillMaxWidth()
                 .height(54.dp),
             onClick = {
+                onClick()
                 onDismissRequest()
             },
             colors = ButtonDefaults.buttonColors(
@@ -388,7 +404,6 @@ private fun SimpleDialogScreen(
 
 @Composable
 private fun YesOrNoDialogScreen(
-    id: String,
     title: String,
     message: String?,
     confirmTitle: String,
@@ -444,6 +459,7 @@ private fun YesOrNoDialogScreen(
                     .height(54.dp),
                 onClick = {
                     onConfirm()
+                    onDismissRequest()
                 },
                 colors = ButtonDefaults.buttonColors(
                     containerColor = Color.Black,
@@ -461,11 +477,11 @@ private fun YesOrNoDialogScreen(
 @Composable
 private fun SimpleDialogPreview() {
     SimpleDialogScreen(
-        id = "Simple",
         title = "이미 가입된 계정이 있습니다",
         message = "와이파이 확인해 임마!",
         onDismissRequest = {},
         confirmTitle = "확인",
+        onClick = {},
     )
 }
 
@@ -473,7 +489,6 @@ private fun SimpleDialogPreview() {
 @Composable
 private fun YesOrNoDialogPreview() {
     YesOrNoDialogScreen(
-        id = "Simple",
         title = "이미 가입된 계정이 있습니다",
         message = "와이파이 확인해 임마!",
         onConfirm = {},
