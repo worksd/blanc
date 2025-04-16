@@ -141,4 +141,9 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun changeWebEndpoint(endpoint: String) {
         receiver.changeWebEndpoint(endpoint)
     }
+
+    @JavascriptInterface
+    fun openExternalBrowser(url: String) {
+        receiver.openExternalBrowser(url)
+    }
 }

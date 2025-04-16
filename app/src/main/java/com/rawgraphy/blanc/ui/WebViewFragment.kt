@@ -2,6 +2,7 @@ package com.rawgraphy.blanc.ui
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
@@ -202,6 +203,12 @@ class WebViewFragment : Fragment() {
                                 toast =
                                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
                                 toast?.show()
+                            }
+
+                            override fun openExternalBrowser(url: String) {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(intent)
                             }
 
                             override fun replace(route: String) {

@@ -21,4 +21,5 @@ interface EventReceiver {
     fun showBottomSheet(route: String)
     fun closeBottomSheet()
     fun changeWebEndpoint(endpoint: String)
+    fun openExternalBrowser(url: String)
 }
