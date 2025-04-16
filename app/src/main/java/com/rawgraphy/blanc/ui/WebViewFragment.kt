@@ -316,28 +316,23 @@ class WebViewFragment : Fragment() {
                                 requestPayment(paymentInfo)
                             }
 
-                            @SuppressLint("HardwareIds")
                             override fun sendFcmToken() {
-                                FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-                                    if (!task.isSuccessful) {
-                                        return@OnCompleteListener
-                                    }
-
-                                    // Get new FCM registration token
-                                    val token = task.result
-                                    try {
-                                        binding.webView.onFcmTokenComplete(
-                                            requireActivity(),
-                                            fcmToken = token,
-                                            udid = Settings.Secure.getString(
-                                                requireContext().contentResolver,
-                                                Settings.Secure.ANDROID_ID
+                                try {
+                                    FirebaseMessaging.getInstance().token.addOnCompleteListener(
+                                        OnCompleteListener { task ->
+                                            if (!task.isSuccessful) {
+                                                return@OnCompleteListener
+                                            }
+                                            val token = task.result
+                                            binding.webView.onFcmTokenComplete(
+                                                requireActivity(),
+                                                fcmToken = token,
+                                                udid = "",
                                             )
-                                        )
-                                    } catch (e: Exception) {
-                                        Log.d("WebAppInterface", "sendFcmToken: $e")
-                                    }
-                                })
+                                        })
+                                } catch (e: Exception) {
+                                    Log.d("WebAppInterface", "sendFcmToken: $e")
+                                }
                             }
 
                             override fun changeWebEndpoint(endpoint: String) {
@@ -353,8 +348,8 @@ class WebViewFragment : Fragment() {
                         val newUserAgent = "${settings.userAgentString} KloudNativeClient/${version}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
-                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-//                        loadUrl("http://192.168.45.65:3000$pageRoute")
+//                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
+                        loadUrl("http://192.168.0.12:3000$pageRoute")
 
                     }
                 }
