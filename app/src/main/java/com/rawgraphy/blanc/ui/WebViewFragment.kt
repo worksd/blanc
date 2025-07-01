@@ -339,6 +339,12 @@ class WebViewFragment : Fragment() {
                                 PrefUtils(context).setString(WebEndPointKey, endpoint)
                             }
 
+                            override fun refresh(endpoint: String) {
+                                if (endpoint == pageRoute) {
+                                    binding.webView.reload()
+                                }
+                            }
+
                         }), "KloudEvent")
 
                         val pInfo =
@@ -436,6 +442,7 @@ class WebViewFragment : Fragment() {
             type = KloudDialogType.SIMPLE.name,
             title = title,
             message = message,
+            confirmTitle = "확인",
             onClickHideDialog = { id, clicked ->
             },
             onClick = {
