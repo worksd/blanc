@@ -25,6 +25,13 @@ class MainViewModel @Inject constructor(
     private val _errorInvoked: MutableSharedFlow<Throwable> = MutableSharedFlow()
     val errorInvoked: SharedFlow<Throwable> = _errorInvoked
 
+    private val _refresh: MutableSharedFlow<String> = MutableSharedFlow()
+    val refresh: SharedFlow<String> = _refresh
+
+    init {
+        Log.d("MainViewModel", "MainViewModel initialized ${this}")
+    }
+
     fun kakaoLogin(context: Context) {
         viewModelScope.launch {
             runCatching {
@@ -44,6 +51,17 @@ class MainViewModel @Inject constructor(
                 loginRepository.googleLogin(context, serverClientId, nonce)
             }.onSuccess {
                 _onGoogleLoginSuccess.emit(it)
+            }.onFailure {
+                _errorInvoked.emit(it)
+            }
+        }
+    }
+
+    fun refresh(endpoint: String) {
+        viewModelScope.launch {
+            runCatching {
+                Log.d("WebAppInterface", "refresh")
+                _refresh.emit(endpoint)
             }.onFailure {
                 _errorInvoked.emit(it)
             }

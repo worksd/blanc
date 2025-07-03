@@ -58,6 +58,7 @@ fun WebView.onDialogConfirm(activity: Activity, dialogInfo: KloudDialogInfo) {
                     "title" to dialogInfo.title,
                     "message" to dialogInfo.message,
                     "ctaButtonText" to dialogInfo.ctaButtonText,
+                    "customData" to dialogInfo.customData,
                 )
             )
         )

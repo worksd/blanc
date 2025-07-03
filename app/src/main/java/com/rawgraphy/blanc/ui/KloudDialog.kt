@@ -76,6 +76,7 @@ class KloudDialog : DialogFragment() {
         val ctaButtonText = requireArguments().getString("ctaButtonText")
         val confirmTitle = requireArguments().getString("confirmTitle")
         val cancelTitle = requireArguments().getString("cancelTitle")
+        val customData = requireArguments().getString("customData")
 
         return ComposeView(requireContext()).apply {
             setContent {
@@ -100,6 +101,7 @@ class KloudDialog : DialogFragment() {
                                     ctaButtonText = ctaButtonText,
                                     confirmTitle = confirmTitle,
                                     cancelTitle = cancelTitle,
+                                    customData = customData,
                                 )
                             )
                         },
@@ -128,6 +130,7 @@ class KloudDialog : DialogFragment() {
                                     ctaButtonText = ctaButtonText,
                                     confirmTitle = confirmTitle,
                                     cancelTitle = cancelTitle,
+                                    customData = customData,
                                 )
                             )
                         },
@@ -154,6 +157,7 @@ class KloudDialog : DialogFragment() {
                                     ctaButtonText = ctaButtonText,
                                     confirmTitle = confirmTitle,
                                     cancelTitle = cancelTitle,
+                                    customData = customData,
                                 )
                             )
                         },
@@ -197,6 +201,7 @@ class KloudDialog : DialogFragment() {
             imageRatio: Float? = null,
             confirmTitle: String? = null,
             cancelTitle: String? = null,
+            customData: String? = null,
             onClick: (KloudDialogInfo) -> Unit,
             onClickHideDialog: (String, Boolean) -> Unit,
         ): KloudDialog {
@@ -213,6 +218,7 @@ class KloudDialog : DialogFragment() {
                 putString("ctaButtonText", ctaButtonText)
                 putString("confirmTitle", confirmTitle)
                 putString("cancelTitle", cancelTitle)
+                putString("customData", customData)
             }
             dialog.onClick = onClick
             dialog.onClickHideDialog = onClickHideDialog

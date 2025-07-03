@@ -1,13 +1,16 @@
 package com.rawgraphy.blanc.ui
 
+import android.app.Dialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import androidx.fragment.app.DialogFragment
 import com.rawgraphy.blanc.databinding.FragmentBottomSheetBinding
+import dagger.hilt.android.AndroidEntryPoint
 
-class KloudBottomSheetFragment: BottomSheetDialogFragment() {
+@AndroidEntryPoint
+class KloudBottomSheetFragment : DialogFragment() {
 
     private lateinit var binding: FragmentBottomSheetBinding
 
@@ -18,6 +21,16 @@ class KloudBottomSheetFragment: BottomSheetDialogFragment() {
     ): View {
         binding = FragmentBottomSheetBinding.inflate(inflater, container, false);
         return binding.root
+    }
+
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return super.onCreateDialog(savedInstanceState).apply {
+            dialog?.window?.setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            )
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

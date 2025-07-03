@@ -27,4 +27,6 @@ data class KloudDialogInfo(
     val confirmTitle: String?,
     @SerializedName("cancelTitle")
     val cancelTitle: String?,
+    @SerializedName("customData")
+    val customData: String?,
 )

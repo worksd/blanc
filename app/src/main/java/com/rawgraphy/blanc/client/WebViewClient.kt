@@ -146,4 +146,9 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun openExternalBrowser(url: String) {
         receiver.openExternalBrowser(url)
     }
+
+    @JavascriptInterface
+    fun refresh(endpoint: String) {
+        receiver.refresh(endpoint)
+    }
 }

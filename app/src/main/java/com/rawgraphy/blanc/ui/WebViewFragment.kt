@@ -57,7 +57,9 @@ import kotlinx.coroutines.launch
 class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance() }
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by viewModels(
+        ownerProducer = { requireActivity() }
+    )
     private lateinit var bottomSheet: KloudBottomSheetFragment
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
@@ -113,9 +115,23 @@ class WebViewFragment : Fragment() {
             backPressedCallback
         )
         collectRefreshEvent(route)
+        collectViewModelRefreshEvent(route)
 
         Log.d("WebViewFragment", "onViewCreated: $tag")
     }
+
+    private fun collectViewModelRefreshEvent(route: String) {
+        lifecycleScope.launch {
+            viewModel.refresh.collect {
+                Log.d("WebViewFragment", "collectViewModelRefreshEvent: $it")
+                if (route.startsWith(it)) {
+                    binding.webView.reload()
+                    Log.d("FirebaseMessaging", "collectViewModelRefreshEvent: $route")
+                }
+            }
+        }
+    }
+
 
     private fun collectRefreshEvent(route: String) {
         lifecycleScope.launch {
@@ -176,9 +192,12 @@ class WebViewFragment : Fragment() {
                         displayZoomControls = false
                         allowContentAccess = true
                         domStorageEnabled = true
-                        val kloudWebChromeClient = object: WebChromeClient() {
+                        val kloudWebChromeClient = object : WebChromeClient() {
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
-                                Log.d("WebAppInterface", "onConsoleMessage: ${consoleMessage?.message()}")
+                                Log.d(
+                                    "WebAppInterface",
+                                    "onConsoleMessage: ${consoleMessage?.message()}"
+                                )
                                 return super.onConsoleMessage(consoleMessage)
                             }
                         }
@@ -284,7 +303,8 @@ class WebViewFragment : Fragment() {
                                         type = dialogInfo.type,
                                         ctaButtonText = dialogInfo.ctaButtonText,
                                         confirmTitle = dialogInfo.confirmTitle,
-                                        cancelTitle = dialogInfo.cancelTitle
+                                        cancelTitle = dialogInfo.cancelTitle,
+                                        customData = dialogInfo.customData,
                                     ).show(childFragmentManager, "KloudDialog")
                                 } catch (e: Throwable) {
                                     Log.d("WebAppInterface", "showDialog: $e")
@@ -340,22 +360,21 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun refresh(endpoint: String) {
-                                if (endpoint == pageRoute) {
-                                    binding.webView.reload()
-                                }
+                                viewModel.refresh(endpoint)
                             }
 
                         }), "KloudEvent")
 
                         val pInfo =
-                                context.packageManager.getPackageInfo(context.packageName, 0)
+                            context.packageManager.getPackageInfo(context.packageName, 0)
                         val version = pInfo.versionName
 
-                        val newUserAgent = "${settings.userAgentString} KloudNativeClient/${version}"
+                        val newUserAgent =
+                            "${settings.userAgentString} KloudNativeClient/${version}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-//                        loadUrl("http://192.168.0.12:3000$pageRoute")
+//                        loadUrl("http://192.168.45.206:3000$pageRoute")
 
                     }
                 }
