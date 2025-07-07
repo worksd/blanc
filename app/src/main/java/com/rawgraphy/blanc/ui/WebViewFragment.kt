@@ -16,7 +16,7 @@ import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
@@ -57,9 +57,7 @@ import kotlinx.coroutines.launch
 class WebViewFragment : Fragment() {
 
     private val cookieManager by lazy { CookieManager.getInstance() }
-    private val viewModel: MainViewModel by viewModels(
-        ownerProducer = { requireActivity() }
-    )
+    private val viewModel: MainViewModel by activityViewModels()
     private lateinit var bottomSheet: KloudBottomSheetFragment
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
