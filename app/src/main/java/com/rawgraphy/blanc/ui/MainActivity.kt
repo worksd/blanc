@@ -7,7 +7,10 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
@@ -25,6 +28,8 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
+
+    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,6 +115,7 @@ class MainActivity : AppCompatActivity() {
             bottomMenuList.reversed().forEach {
                 val fragment = WebViewFragment.newInstance(
                     route = it.page.route,
+                    isBottomMenu = true,
                 )
                 supportFragmentManager.beginTransaction().apply {
                     add(binding.fragmentContainer.id, fragment, it.page.route)
@@ -119,14 +125,21 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.bottomNavigation.setContent {
-            val selectedRoute = remember { mutableStateOf(bottomMenuList.first().page.route)}
+
+            val currentSelectedRoute = viewModel.currentSelectedBottomRoute.collectAsState().value
+
+            LaunchedEffect(bottomMenuList) {
+                if (currentSelectedRoute.isEmpty()) {
+                    viewModel.selectBottomMenu(bottomMenuList.firstOrNull()?.page?.route.orEmpty())
+                }
+            }
             BottomNavigation(
                 bottomMenuList = bottomMenuList,
                 onClick = { route ->
-                    selectedRoute.value = route
+                    viewModel.selectBottomMenu(route)
                     showFragment(route)
                 },
-                currentSelectedRoute = selectedRoute.value
+                currentSelectedRoute = currentSelectedRoute,
             )
         }
     }

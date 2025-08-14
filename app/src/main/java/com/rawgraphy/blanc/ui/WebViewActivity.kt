@@ -70,6 +70,7 @@ class WebViewActivity : AppCompatActivity() {
         supportFragmentManager.beginTransaction().apply {
             val fragment = WebViewFragment.newInstance(
                 route = route,
+                isBottomMenu = false,
             )
             replace(binding.fragmentContainer.id, fragment, route)
             show(fragment)

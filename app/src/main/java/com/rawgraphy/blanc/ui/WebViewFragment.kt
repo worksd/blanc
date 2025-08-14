@@ -15,6 +15,7 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
@@ -62,7 +63,7 @@ class WebViewFragment : Fragment() {
 
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
-            isEnabled = false  // 콜백 비활성화
+            isEnabled = false
             requireActivity().onBackPressedDispatcher.onBackPressed()
         }
     }
@@ -103,11 +104,14 @@ class WebViewFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val route = requireArguments().getString(ARG_ROUTE).orEmpty()
-        initWebView(
-            pageRoute = route,
-        )
+        val isBottomMenu = requireArguments().getBoolean(ARG_IS_BOTTOM_MENU)
         collectEvents()
 
+        if (!isBottomMenu) {
+            initWebView(route)
+        }
+
+        onBottomMenuChanged(route)
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             backPressedCallback
@@ -116,6 +120,16 @@ class WebViewFragment : Fragment() {
         collectViewModelRefreshEvent(route)
 
         Log.d("WebViewFragment", "onViewCreated: $tag")
+    }
+
+    private fun onBottomMenuChanged(route: String) {
+        lifecycleScope.launch {
+            viewModel.currentSelectedBottomRoute.collect {
+                if (it == route && !binding.webView.isVisible) {
+                    initWebView(route)
+                }
+            }
+        }
     }
 
     private fun collectViewModelRefreshEvent(route: String) {
@@ -143,30 +157,12 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    @SuppressLint("HardwareIds")
-    private fun sendFcmToken() {
-        lifecycleScope.launch {
-            delay(3000L)
-            FirebaseMessaging.getInstance().token.addOnCompleteListener(
-                OnCompleteListener { task ->
-                    if (!task.isSuccessful) {
-                        return@OnCompleteListener
-                    }
-                    val token = task.result
-                    val udid = Settings.Secure.getString(
-                        requireContext().contentResolver,
-                        Settings.Secure.ANDROID_ID
-                    )
-                    binding.webView.onFcmTokenComplete(requireActivity(), token, udid)
-                })
-        }
-    }
-
     @SuppressLint("SetJavaScriptEnabled")
     private fun initWebView(
         pageRoute: String,
     ) {
         try {
+            binding.webView.visibility = View.VISIBLE
             lifecycleScope.launch {
                 delay(7000L)
                 if (isLoading) {
@@ -477,11 +473,14 @@ class WebViewFragment : Fragment() {
 
     companion object {
         private const val ARG_ROUTE = "ARG_ROUTE"
+        private const val ARG_IS_BOTTOM_MENU = "ARG_IS_BOTTOM_MENU"
         fun newInstance(
             route: String,
+            isBottomMenu: Boolean,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_ROUTE, route)
+                putBoolean(ARG_IS_BOTTOM_MENU, isBottomMenu)
             }
         }
     }

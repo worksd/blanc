@@ -43,6 +43,7 @@ class KloudBottomSheetFragment : DialogFragment() {
         val route = requireArguments().getString(ARG_ROUTE).orEmpty()
         val fragment = WebViewFragment.newInstance(
             route = route,
+            isBottomMenu = false,
         )
         childFragmentManager.beginTransaction().apply {
             add(binding.fragmentContainer.id, fragment, route)

@@ -4,11 +4,14 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rawgraphy.blanc.data.BottomMenuResponse
 import com.rawgraphy.blanc.data.LoginRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 @HiltViewModel
@@ -22,6 +25,9 @@ class MainViewModel @Inject constructor(
     private val _onGoogleLoginSuccess: MutableSharedFlow<String> = MutableSharedFlow()
     val onGoogleLoginSuccess: SharedFlow<String> = _onGoogleLoginSuccess
 
+    private val _currentSelectedBottomRoute: MutableStateFlow<String> = MutableStateFlow("")
+    val currentSelectedBottomRoute: StateFlow<String> = _currentSelectedBottomRoute
+
     private val _errorInvoked: MutableSharedFlow<Throwable> = MutableSharedFlow()
     val errorInvoked: SharedFlow<Throwable> = _errorInvoked
 
@@ -30,6 +36,12 @@ class MainViewModel @Inject constructor(
 
     init {
         Log.d("MainViewModel", "MainViewModel initialized ${this}")
+    }
+
+    fun selectBottomMenu(route: String) {
+        viewModelScope.launch {
+            _currentSelectedBottomRoute.emit(route)
+        }
     }
 
     fun kakaoLogin(context: Context) {
