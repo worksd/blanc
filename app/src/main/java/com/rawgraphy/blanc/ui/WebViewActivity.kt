@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.databinding.ActivityWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -35,6 +36,8 @@ class WebViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, true)
+
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
@@ -46,23 +49,6 @@ class WebViewActivity : AppCompatActivity() {
             window.navigationBarColor = android.graphics.Color.parseColor("#000000")
         } else {
             loadWebViewFragment(route)
-        }
-
-        getKeyHash()
-    }
-
-    private fun getKeyHash() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-            val packageInfo = packageManager.getPackageInfo(packageName, PackageManager.GET_SIGNING_CERTIFICATES)
-            for (signature in packageInfo.signingInfo.apkContentsSigners) {
-                try {
-                    val md = MessageDigest.getInstance("SHA")
-                    md.update(signature.toByteArray())
-                    Log.d("getKeyHash", "key hash: ${Base64.encodeToString(md.digest(), Base64.NO_WRAP)}")
-                } catch (e: NoSuchAlgorithmException) {
-                    Log.w("getKeyHash", "Unable to get MessageDigest. signature=$signature", e)
-                }
-            }
         }
     }
 

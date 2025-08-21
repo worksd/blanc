@@ -10,14 +10,14 @@ plugins {
 
 android {
     namespace = "com.rawgraphy.blanc"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.rawgraphy.blanc"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 12
-        versionName = "1.0.12"
+        targetSdk = 36
+        versionCode = 13
+        versionName = "1.0.13"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true

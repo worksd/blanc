@@ -1,5 +1,6 @@
 package com.rawgraphy.blanc.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -41,7 +42,7 @@ fun BottomNavigation(
     }
 
     Row(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth().background(Color.White)
     ) {
         bottomMenuList.forEach { item ->
             key(item.page.route) {
