@@ -4,6 +4,7 @@
     <style name="Theme.Blanc" parent="Theme.AppCompat.Light.DarkActionBar" >
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:fitsSystemWindows">true</item>
     </style>
 
     <style name="TransparentDialog">
