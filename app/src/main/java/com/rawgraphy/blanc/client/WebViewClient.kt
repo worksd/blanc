@@ -9,6 +9,7 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
+import com.google.gson.annotations.SerializedName
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
 
@@ -57,17 +58,22 @@ class WebAppInterface(val receiver: EventReceiver) {
 
     @JavascriptInterface
     fun replace(screen: String) {
+        Log.d("WebAppInterface", "screen = $screen")
         receiver.replace(screen)
     }
 
     @JavascriptInterface
     fun push(screen: String) {
-        receiver.push(screen)
+        Log.d("WebAppInterface", "screen = $screen")
+        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
+        receiver.push(routeInfo)
     }
 
     @JavascriptInterface
     fun fullSheet(screen: String) {
-        receiver.fullSheet(screen)
+        Log.d("WebAppInterface", "screen = $screen")
+        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
+        receiver.fullSheet(routeInfo)
     }
 
     @JavascriptInterface
@@ -77,7 +83,9 @@ class WebAppInterface(val receiver: EventReceiver) {
 
     @JavascriptInterface
     fun clearAndPush(screen: String) {
-        receiver.pushAndAllClear(screen)
+        Log.d("WebAppInterface", "screen = $screen")
+        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
+        receiver.pushAndAllClear(routeInfo)
     }
 
     @JavascriptInterface
@@ -152,3 +160,12 @@ class WebAppInterface(val receiver: EventReceiver) {
         receiver.refresh(endpoint)
     }
 }
+
+data class RouteInfo(
+    @SerializedName("route")
+    val route: String,
+    @SerializedName("ignoreSafeArea")
+    val ignoreSafeArea: Boolean,
+    @SerializedName("title")
+    val title: String?
+)

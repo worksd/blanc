@@ -11,4 +11,10 @@
         android:layout_height="match_parent"
         android:background="@color/white" />
 
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/top_bar"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
 </androidx.constraintlayout.widget.ConstraintLayout>

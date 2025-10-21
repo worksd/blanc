@@ -5,11 +5,11 @@ import com.rawgraphy.blanc.data.KloudDialogInfo
 
 interface EventReceiver {
     fun replace(route: String)
-    fun push(route: String)
+    fun push(routeInfo: RouteInfo)
     fun showToast(message: String)
-    fun fullSheet(route: String)
+    fun fullSheet(routeInfo: RouteInfo)
     fun navigateMain(bootInfo: String)
-    fun pushAndAllClear(route: String)
+    fun pushAndAllClear(routeInfo: RouteInfo)
     fun back()
     fun clearToken()
     fun sendHapticFeedback()

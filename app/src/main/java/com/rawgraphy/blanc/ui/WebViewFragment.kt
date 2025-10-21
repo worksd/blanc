@@ -15,6 +15,22 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -25,6 +41,7 @@ import com.google.gson.Gson
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.client.CustomWebViewClient
 import com.rawgraphy.blanc.client.EventReceiver
+import com.rawgraphy.blanc.client.RouteInfo
 import com.rawgraphy.blanc.client.WebAppInterface
 import com.rawgraphy.blanc.client.WebViewListener
 import com.rawgraphy.blanc.client.onDialogConfirm
@@ -111,6 +128,8 @@ class WebViewFragment : Fragment() {
             initWebView(route)
         }
 
+        initTopBar()
+
         onBottomMenuChanged(route)
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
@@ -120,6 +139,32 @@ class WebViewFragment : Fragment() {
         collectViewModelRefreshEvent(route)
 
         Log.d("WebViewFragment", "onViewCreated: $tag")
+    }
+
+    private fun initTopBar() {
+        binding.topBar.setContent {
+            val title = remember { mutableStateOf(requireActivity().intent.getStringExtra("title")) }
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(24.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (title.value != null) {
+                    Image(
+                        painter = painterResource(R.drawable.ic_arrow_back),
+                        contentDescription = "Arrow Back",
+                        modifier = Modifier.clickable {
+                            requireActivity().finish()
+                        }
+                    )
+                    Text(
+                        text = title.value.orEmpty(),
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
+                }
+            }
+        }
     }
 
     private fun onBottomMenuChanged(route: String) {
@@ -228,16 +273,16 @@ class WebViewFragment : Fragment() {
                                 initWebView(route)
                             }
 
-                            override fun push(route: String) {
-                                navigate(route, withBottomUp = false)
+                            override fun push(routeInfo: RouteInfo) {
+                                navigate(routeInfo, withBottomUp = false)
                             }
 
-                            override fun fullSheet(route: String) {
-                                navigate(route, withBottomUp = true)
+                            override fun fullSheet(routeInfo: RouteInfo) {
+                                navigate(routeInfo, withBottomUp = true)
                             }
 
-                            override fun pushAndAllClear(route: String) {
-                                clearAndPush(route)
+                            override fun pushAndAllClear(routeInfo: RouteInfo) {
+                                clearAndPush(routeInfo)
                             }
 
                             override fun back() {
@@ -379,20 +424,22 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    private fun navigate(route: String, withBottomUp: Boolean) {
+    private fun navigate(routeInfo: RouteInfo, withBottomUp: Boolean) {
         val intent = Intent(requireActivity(), WebViewActivity::class.java)
-        intent.putExtra("route", route)
+        intent.putExtra("route", routeInfo.route)
+        intent.putExtra("title", routeInfo.title)
         startActivity(intent)
         if (withBottomUp) {
             requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
         }
     }
 
-    private fun clearAndPush(route: String) {
+    private fun clearAndPush(routeInfo: RouteInfo) {
         val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        intent.putExtra("route", route)
+        intent.putExtra("route", routeInfo.route)
+        intent.putExtra("title", routeInfo.title)
         startActivity(intent)
         requireActivity().overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
     }
