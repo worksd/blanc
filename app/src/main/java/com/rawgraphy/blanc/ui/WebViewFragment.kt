@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.provider.Settings
 import android.util.Log
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
@@ -16,17 +15,18 @@ import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Text
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -93,7 +93,7 @@ class WebViewFragment : Fragment() {
         PortOne.registerForPaymentActivity(this, callback = object :
             PaymentCallback {
             override fun onSuccess(response: PaymentResponse.Success) {
-                Log.d("NativeLog", "onSuccess: $response")
+                Log.d("onConsoleMessage", "onSuccess: $response")
                 binding.webView.onPaymentSuccess(
                     requireActivity(),
                     transactionId = response.txId,
@@ -102,6 +102,7 @@ class WebViewFragment : Fragment() {
             }
 
             override fun onFail(response: PaymentResponse.Fail) {
+                Log.d("onConsoleMessage", "onPaymentFail ${response}")
                 onErrorInvoked(
                     code = response.code,
                 )
@@ -142,23 +143,30 @@ class WebViewFragment : Fragment() {
     }
 
     private fun initTopBar() {
-        binding.topBar.setContent {
-            val title = remember { mutableStateOf(requireActivity().intent.getStringExtra("title")) }
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (title.value != null) {
+        val title = requireActivity().intent.getStringExtra("title")
+        if (title != null) {
+            binding.topBar.visibility = View.VISIBLE
+            binding.topBar.setContent {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp)
+                        .background(Color.White),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     Image(
                         painter = painterResource(R.drawable.ic_arrow_back),
                         contentDescription = "Arrow Back",
-                        modifier = Modifier.clickable {
+                        modifier = Modifier.clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
                             requireActivity().finish()
                         }
                     )
                     Text(
-                        text = title.value.orEmpty(),
+                        text = title,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
                     )
