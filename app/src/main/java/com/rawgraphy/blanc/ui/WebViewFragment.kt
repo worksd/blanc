@@ -167,7 +167,6 @@ class WebViewFragment : Fragment() {
             androidx.compose.foundation.layout.Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(Color.White)
             ) {
                 Row(
                     modifier = Modifier
@@ -175,7 +174,7 @@ class WebViewFragment : Fragment() {
                         .padding(
                             horizontal = 20.dp, vertical = when (ignoreSafeArea) {
                                 true -> 36.dp
-                                false -> 12.dp
+                                false -> 18.dp
                             }
                         ),
                     verticalAlignment = Alignment.CenterVertically,

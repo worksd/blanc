@@ -7,7 +7,7 @@ import com.google.gson.annotations.SerializedName
 data class BootInfoResponse(
     @SerializedName("bottomMenuList")
     val bottomMenuList: List<BottomMenuResponse>,
-    @SerializedName("route")
+    @SerializedName("routeInfo")
     val routeInfo: RouteInfo?,
 )
 

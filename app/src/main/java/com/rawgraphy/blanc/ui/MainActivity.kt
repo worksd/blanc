@@ -36,19 +36,17 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         try {
-            Log.d("WebAppInterface", "asdf")
-
             val bootInfo =
                 Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
             Log.d("WebAppInterface", "bootInfo = $bootInfo")
             if (bootInfo != null) {
                 lifecycleScope.launch {
-                    Log.d("WebAppInterface", bootInfo.bottomMenuList.toString())
                     addMainFragment(bootInfo.bottomMenuList)
                     if (!bootInfo.routeInfo?.route.isNullOrEmpty()) {
                         val intent = Intent(this@MainActivity, WebViewActivity::class.java)
                         intent.putExtra("route", bootInfo.routeInfo.route)
                         intent.putExtra("title", bootInfo.routeInfo.title)
+                        intent.putExtra("ignoreSafeArea", bootInfo.routeInfo.ignoreSafeArea)
                         startActivity(intent)
                     }
                 }
