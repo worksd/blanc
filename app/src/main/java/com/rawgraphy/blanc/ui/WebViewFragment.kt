@@ -55,6 +55,7 @@ import com.rawgraphy.blanc.data.KloudDialogInfo
 import com.rawgraphy.blanc.data.PaymentInfo
 import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
+import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
 import com.rawgraphy.blanc.util.refreshWebView
