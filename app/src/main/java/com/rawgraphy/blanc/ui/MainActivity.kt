@@ -11,14 +11,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.rawgraphy.blanc.data.BootInfoResponse
 import com.rawgraphy.blanc.data.BottomMenuResponse
@@ -34,23 +30,31 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        WindowCompat.setDecorFitsSystemWindows(window, true)
         askNotificationPermission()
 
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
 
-        val bootInfo = Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
-        if (bootInfo != null) {
-            lifecycleScope.launch {
-                addMainFragment(bootInfo.bottomMenuList)
-                if (!bootInfo.route.isNullOrEmpty()) {
-                    val intent = Intent(this@MainActivity, WebViewActivity::class.java)
-                    intent.putExtra("route", bootInfo.route)
-                    startActivity(intent)
+        try {
+            Log.d("WebAppInterface", "asdf")
+
+            val bootInfo =
+                Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
+            Log.d("WebAppInterface", "bootInfo = $bootInfo")
+            if (bootInfo != null) {
+                lifecycleScope.launch {
+                    Log.d("WebAppInterface", bootInfo.bottomMenuList.toString())
+                    addMainFragment(bootInfo.bottomMenuList)
+                    if (!bootInfo.routeInfo?.route.isNullOrEmpty()) {
+                        val intent = Intent(this@MainActivity, WebViewActivity::class.java)
+                        intent.putExtra("route", bootInfo.routeInfo.route)
+                        intent.putExtra("title", bootInfo.routeInfo.title)
+                        startActivity(intent)
+                    }
                 }
             }
+        } catch (e: Throwable) {
+            Log.d("WebAppInterface", "bootInfo = ${e.message}")
         }
     }
 

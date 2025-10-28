@@ -2,6 +2,7 @@ package com.rawgraphy.blanc.client
 
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
+import com.rawgraphy.blanc.data.RouteInfo
 
 interface EventReceiver {
     fun replace(route: String)

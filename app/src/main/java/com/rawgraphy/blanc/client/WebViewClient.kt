@@ -12,6 +12,7 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
+import com.rawgraphy.blanc.data.RouteInfo
 
 
 class CustomWebViewClient(private val listener: WebViewListener) : WebViewClient() {
@@ -160,12 +161,3 @@ class WebAppInterface(val receiver: EventReceiver) {
         receiver.refresh(endpoint)
     }
 }
-
-data class RouteInfo(
-    @SerializedName("route")
-    val route: String,
-    @SerializedName("ignoreSafeArea")
-    val ignoreSafeArea: Boolean,
-    @SerializedName("title")
-    val title: String?
-)

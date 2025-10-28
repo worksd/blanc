@@ -41,7 +41,6 @@ import com.google.gson.Gson
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.client.CustomWebViewClient
 import com.rawgraphy.blanc.client.EventReceiver
-import com.rawgraphy.blanc.client.RouteInfo
 import com.rawgraphy.blanc.client.WebAppInterface
 import com.rawgraphy.blanc.client.WebViewListener
 import com.rawgraphy.blanc.client.onDialogConfirm
@@ -54,8 +53,8 @@ import com.rawgraphy.blanc.client.onPaymentSuccess
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
 import com.rawgraphy.blanc.data.PaymentInfo
+import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
-import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
 import com.rawgraphy.blanc.util.refreshWebView
@@ -144,7 +143,7 @@ class WebViewFragment : Fragment() {
 
     private fun initTopBar() {
         val title = requireActivity().intent.getStringExtra("title")
-        if (title != null) {
+        if (!title.isNullOrEmpty()) {
             binding.topBar.visibility = View.VISIBLE
             binding.topBar.setContent {
                 Row(
@@ -436,6 +435,7 @@ class WebViewFragment : Fragment() {
         val intent = Intent(requireActivity(), WebViewActivity::class.java)
         intent.putExtra("route", routeInfo.route)
         intent.putExtra("title", routeInfo.title)
+        intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
         startActivity(intent)
         if (withBottomUp) {
             requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
@@ -448,6 +448,7 @@ class WebViewFragment : Fragment() {
         }
         intent.putExtra("route", routeInfo.route)
         intent.putExtra("title", routeInfo.title)
+        intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
         startActivity(intent)
         requireActivity().overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
     }

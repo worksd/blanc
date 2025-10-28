@@ -1,32 +1,25 @@
 package com.rawgraphy.blanc.ui
 
-import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
+import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
-import android.util.Base64
-import android.util.Log
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.core.view.WindowCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.databinding.ActivityWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 
 @AndroidEntryPoint
 class WebViewActivity : AppCompatActivity() {
@@ -36,13 +29,30 @@ class WebViewActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        WindowCompat.setDecorFitsSystemWindows(window, true)
-
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val route = intent.getStringExtra("route")
+        initSafeArea()
+        initWebView()
+    }
 
+    private fun initSafeArea() {
+        val ignoreSafeArea = intent.getBooleanExtra("ignoreSafeArea", false)
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            v.setPadding(
+                v.paddingLeft, when (ignoreSafeArea) {
+                    true -> 0
+                    false -> top
+                }, v.paddingRight, bottom
+            )
+            insets
+        }
+    }
+
+    private fun initWebView() {
+        val route = intent.getStringExtra("route")
         if (route.isNullOrEmpty()) {
             loadSplashScreen()
             loadWebViewFragment("/splash")
