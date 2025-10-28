@@ -18,17 +18,22 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Text
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.isVisible
@@ -144,31 +149,59 @@ class WebViewFragment : Fragment() {
 
     private fun initTopBar() {
         val title = requireActivity().intent.getStringExtra("title")
-        if (!title.isNullOrEmpty()) {
-            binding.topBar.visibility = View.VISIBLE
-            binding.topBar.setContent {
+        val ignoreSafeArea = requireActivity().intent.getBooleanExtra("ignoreSafeArea", false)
+
+        if (title == null) {
+            binding.topBar.visibility = View.GONE
+            return
+        }
+
+        binding.topBar.visibility = View.VISIBLE
+
+        // ComposeView 생명주기 맞추기 (권장)
+        binding.topBar.setViewCompositionStrategy(
+            ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+        )
+
+        binding.topBar.setContent {
+            androidx.compose.foundation.layout.Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+            ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
-                        .background(Color.White),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        .padding(
+                            horizontal = 20.dp, vertical = when (ignoreSafeArea) {
+                                true -> 36.dp
+                                false -> 12.dp
+                            }
+                        ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
                         painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = "Arrow Back",
-                        modifier = Modifier.clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            requireActivity().finish()
-                        }
+                        contentDescription = "Back",
+                        modifier = Modifier
+                            .semantics { contentDescription = "Back" }
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                requireActivity().finish()
+                            }
                     )
+
+                    Spacer(modifier = Modifier.width(12.dp))
+
                     Text(
                         text = title,
                         fontSize = 17.sp,
                         fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        color = Color(0xFF000000),
                     )
                 }
             }
@@ -256,7 +289,7 @@ class WebViewFragment : Fragment() {
                                 }
 
                                 override fun onConnectFail() {
-
+                                    Toast.makeText(requireContext(), "페이지 로딩에 실패하였습니다", Toast.LENGTH_SHORT).show()
                                 }
 
                                 override fun onPageFinished() {
@@ -540,5 +573,20 @@ class WebViewFragment : Fragment() {
                 putBoolean(ARG_IS_BOTTOM_MENU, isBottomMenu)
             }
         }
+    }
+}
+
+
+fun Modifier.runIf(
+    condition: Boolean,
+    ifTrue: Modifier.() -> Modifier,
+    ifFalse: (Modifier.() -> Modifier)? = null
+): Modifier {
+    return if (condition) {
+        then(ifTrue(Modifier))
+    } else if (ifFalse != null) {
+        then(ifFalse(Modifier))
+    } else {
+        this
     }
 }
