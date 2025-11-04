@@ -120,6 +120,8 @@ class MainActivity : AppCompatActivity() {
                 val fragment = WebViewFragment.newInstance(
                     route = it.page.route,
                     isBottomMenu = true,
+                    ignoreSafeArea = false,
+                    title = null,
                 )
                 supportFragmentManager.beginTransaction().apply {
                     add(binding.fragmentContainer.id, fragment, it.page.route)

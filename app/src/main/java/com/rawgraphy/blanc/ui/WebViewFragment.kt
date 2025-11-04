@@ -148,8 +148,8 @@ class WebViewFragment : Fragment() {
     }
 
     private fun initTopBar() {
-        val title = requireActivity().intent.getStringExtra("title")
-        val ignoreSafeArea = requireActivity().intent.getBooleanExtra("ignoreSafeArea", false)
+        val title = arguments?.getString(ARG_TITLE)
+        val ignoreSafeArea = arguments?.getBoolean(ARG_SAFE_AREA, false) ?: false
 
         if (title == null) {
             binding.topBar.visibility = View.GONE
@@ -288,7 +288,6 @@ class WebViewFragment : Fragment() {
                                 }
 
                                 override fun onConnectFail() {
-                                    Toast.makeText(requireContext(), "페이지 로딩에 실패하였습니다", Toast.LENGTH_SHORT).show()
                                 }
 
                                 override fun onPageFinished() {
@@ -562,13 +561,19 @@ class WebViewFragment : Fragment() {
 
     companion object {
         private const val ARG_ROUTE = "ARG_ROUTE"
+        private const val ARG_TITLE = "ARG_TITLE"
+        private const val ARG_SAFE_AREA = "ARG_SAFE_AREA"
         private const val ARG_IS_BOTTOM_MENU = "ARG_IS_BOTTOM_MENU"
         fun newInstance(
             route: String,
+            title: String?,
+            ignoreSafeArea: Boolean,
             isBottomMenu: Boolean,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_ROUTE, route)
+                putString(ARG_TITLE, title)
+                putBoolean(ARG_SAFE_AREA, ignoreSafeArea)
                 putBoolean(ARG_IS_BOTTOM_MENU, isBottomMenu)
             }
         }

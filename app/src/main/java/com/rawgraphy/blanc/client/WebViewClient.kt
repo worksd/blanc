@@ -128,6 +128,7 @@ class WebAppInterface(val receiver: EventReceiver) {
 
     @JavascriptInterface
     fun showBottomSheet(route: String) {
+        Log.d("WebAppInterface", "route = $route")
         receiver.showBottomSheet(route)
     }
 
