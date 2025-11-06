@@ -32,23 +32,7 @@ class WebViewActivity : AppCompatActivity() {
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initSafeArea()
         initWebView()
-    }
-
-    private fun initSafeArea() {
-        val ignoreSafeArea = intent.getBooleanExtra("ignoreSafeArea", false)
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
-            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
-            val bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
-            v.setPadding(
-                v.paddingLeft, when (ignoreSafeArea) {
-                    true -> 0
-                    false -> top
-                }, v.paddingRight, bottom
-            )
-            insets
-        }
     }
 
     private fun initWebView() {

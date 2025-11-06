@@ -15,11 +15,11 @@ import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.displayCutoutPadding
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -36,6 +36,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.widget.ConstraintSet
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -128,12 +131,15 @@ class WebViewFragment : Fragment() {
 
         val route = requireArguments().getString(ARG_ROUTE).orEmpty()
         val isBottomMenu = requireArguments().getBoolean(ARG_IS_BOTTOM_MENU)
+        val ignoreSafeArea = arguments?.getBoolean(ARG_SAFE_AREA, false) ?: false
+
         collectEvents()
 
         if (!isBottomMenu) {
             initWebView(route)
         }
 
+        initView(ignoreSafeArea)
         initTopBar()
 
         onBottomMenuChanged(route)
@@ -144,8 +150,83 @@ class WebViewFragment : Fragment() {
         collectRefreshEvent(route)
         collectViewModelRefreshEvent(route)
 
+        initSafeArea(ignoreSafeArea)
+
         Log.d("WebViewFragment", "onViewCreated: $tag")
     }
+
+    private fun initView(ignoreSafeArea: Boolean) {
+        val parent = binding.root
+        val set = ConstraintSet().apply { clone(parent) }
+        set.connect(
+            binding.topBar.id,
+            ConstraintSet.TOP,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.TOP
+        )
+        set.connect(
+            binding.topBar.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START
+        )
+        set.connect(
+            binding.topBar.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END
+        )
+        set.connect(
+            binding.webView.id,
+            ConstraintSet.START,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.START
+        )
+        set.connect(
+            binding.webView.id,
+            ConstraintSet.END,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.END
+        )
+        set.connect(
+            binding.webView.id,
+            ConstraintSet.BOTTOM,
+            ConstraintSet.PARENT_ID,
+            ConstraintSet.BOTTOM
+        )
+        if (ignoreSafeArea) {
+            set.connect(
+                binding.webView.id,
+                ConstraintSet.TOP,
+                ConstraintSet.PARENT_ID,
+                ConstraintSet.TOP
+            )
+        } else {
+            set.connect(
+                binding.webView.id,
+                ConstraintSet.TOP,
+                binding.topBar.id,
+                ConstraintSet.BOTTOM
+            )
+        }
+        set.applyTo(parent)
+    }
+
+
+    private fun initSafeArea(ignoreSafeArea: Boolean) {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
+            val top = insets.getInsets(WindowInsetsCompat.Type.statusBars()).top
+            val bottom = insets.getInsets(WindowInsetsCompat.Type.navigationBars()).bottom
+            v.setPadding(
+                v.paddingLeft, when (ignoreSafeArea) {
+                    true -> 0
+                    false -> top
+                }, v.paddingRight, bottom
+            )
+            insets
+        }
+    }
+
 
     private fun initTopBar() {
         val title = arguments?.getString(ARG_TITLE)
@@ -164,45 +245,38 @@ class WebViewFragment : Fragment() {
         )
 
         binding.topBar.setContent {
-            androidx.compose.foundation.layout.Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 20.dp, vertical = 20.dp)
+                    .runIf(ignoreSafeArea, ifTrue = {
+                        displayCutoutPadding()
+                    }),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
+                Image(
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = "Back",
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(
-                            horizontal = 20.dp, vertical = when (ignoreSafeArea) {
-                                true -> 36.dp
-                                false -> 18.dp
-                            }
-                        ),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_arrow_back),
-                        contentDescription = "Back",
-                        modifier = Modifier
-                            .semantics { contentDescription = "Back" }
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                requireActivity().finish()
-                            }
-                    )
+                        .semantics { contentDescription = "Back" }
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            requireActivity().finish()
+                        }
+                )
 
-                    Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                    Text(
-                        text = title,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = Color(0xFF000000),
-                    )
-                }
+                Text(
+                    text = title,
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = Color(0xFF000000),
+                )
             }
         }
     }
