@@ -86,6 +86,10 @@ class WebViewFragment : Fragment() {
     private val viewModel: MainViewModel by activityViewModels()
     private lateinit var bottomSheet: KloudBottomSheetFragment
 
+    private var title: String? = null
+    private var ignoreSafeArea = false
+    private var route: String = ""
+
     private val backPressedCallback = object : OnBackPressedCallback(true) {
         override fun handleOnBackPressed() {
             isEnabled = false
@@ -128,10 +132,17 @@ class WebViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val routeArguments = requireArguments().getString(ARG_ROUTE).orEmpty()
 
-        val route = requireArguments().getString(ARG_ROUTE).orEmpty()
+        try {
+            val routeInfo = Gson().fromJson(routeArguments, RouteInfo::class.java)
+            route = routeInfo.route
+            title = routeInfo.title
+            ignoreSafeArea = routeInfo.ignoreSafeArea
+        } catch (e: Throwable) {
+            route = routeArguments
+        }
         val isBottomMenu = requireArguments().getBoolean(ARG_IS_BOTTOM_MENU)
-        val ignoreSafeArea = arguments?.getBoolean(ARG_SAFE_AREA, false) ?: false
 
         collectEvents()
 
@@ -140,7 +151,7 @@ class WebViewFragment : Fragment() {
         }
 
         initView(ignoreSafeArea)
-        initTopBar()
+        initTopBar(title, ignoreSafeArea)
 
         onBottomMenuChanged(route)
         requireActivity().onBackPressedDispatcher.addCallback(
@@ -228,10 +239,7 @@ class WebViewFragment : Fragment() {
     }
 
 
-    private fun initTopBar() {
-        val title = arguments?.getString(ARG_TITLE)
-        val ignoreSafeArea = arguments?.getBoolean(ARG_SAFE_AREA, false) ?: false
-
+    private fun initTopBar(title: String?, ignoreSafeArea: Boolean) {
         if (title == null) {
             binding.topBar.visibility = View.GONE
             return
@@ -386,15 +394,15 @@ class WebViewFragment : Fragment() {
                                 initWebView(route)
                             }
 
-                            override fun push(routeInfo: RouteInfo) {
+                            override fun push(routeInfo: String) {
                                 navigate(routeInfo, withBottomUp = false)
                             }
 
-                            override fun fullSheet(routeInfo: RouteInfo) {
+                            override fun fullSheet(routeInfo: String) {
                                 navigate(routeInfo, withBottomUp = true)
                             }
 
-                            override fun pushAndAllClear(routeInfo: RouteInfo) {
+                            override fun pushAndAllClear(routeInfo: String) {
                                 clearAndPush(routeInfo)
                             }
 
@@ -537,24 +545,20 @@ class WebViewFragment : Fragment() {
         }
     }
 
-    private fun navigate(routeInfo: RouteInfo, withBottomUp: Boolean) {
+    private fun navigate(route: String, withBottomUp: Boolean) {
         val intent = Intent(requireActivity(), WebViewActivity::class.java)
-        intent.putExtra("route", routeInfo.route)
-        intent.putExtra("title", routeInfo.title)
-        intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
+        intent.putExtra("route",route)
         startActivity(intent)
         if (withBottomUp) {
             requireActivity().overridePendingTransition(R.anim.slide_in_up, R.anim.stay)
         }
     }
 
-    private fun clearAndPush(routeInfo: RouteInfo) {
+    private fun clearAndPush(route: String) {
         val intent = Intent(requireActivity(), WebViewActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        intent.putExtra("route", routeInfo.route)
-        intent.putExtra("title", routeInfo.title)
-        intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
+        intent.putExtra("route", route)
         startActivity(intent)
         requireActivity().overridePendingTransition(R.anim.anim_fade_in, R.anim.anim_fade_out)
     }
@@ -635,19 +639,13 @@ class WebViewFragment : Fragment() {
 
     companion object {
         private const val ARG_ROUTE = "ARG_ROUTE"
-        private const val ARG_TITLE = "ARG_TITLE"
-        private const val ARG_SAFE_AREA = "ARG_SAFE_AREA"
         private const val ARG_IS_BOTTOM_MENU = "ARG_IS_BOTTOM_MENU"
         fun newInstance(
             route: String,
-            title: String?,
-            ignoreSafeArea: Boolean,
             isBottomMenu: Boolean,
         ) = WebViewFragment().apply {
             arguments = Bundle().apply {
                 putString(ARG_ROUTE, route)
-                putString(ARG_TITLE, title)
-                putBoolean(ARG_SAFE_AREA, ignoreSafeArea)
                 putBoolean(ARG_IS_BOTTOM_MENU, isBottomMenu)
             }
         }

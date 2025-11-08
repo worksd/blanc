@@ -32,28 +32,25 @@ class WebViewActivity : AppCompatActivity() {
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initWebView()
+        val route = intent?.getStringExtra("route")
+
+        initWebView(route)
     }
 
-    private fun initWebView() {
-        val route = intent.getStringExtra("route")
-        val title = intent.getStringExtra("title")
-        val ignoreSafeArea = intent.getBooleanExtra("ignoreSafeArea", false)
+    private fun initWebView(route: String?) {
         if (route.isNullOrEmpty()) {
             loadSplashScreen()
-            loadWebViewFragment("/splash", null, true)
+            loadWebViewFragment("/splash")
             window.navigationBarColor = android.graphics.Color.parseColor("#000000")
         } else {
-            loadWebViewFragment(route, title, ignoreSafeArea)
+            loadWebViewFragment(route)
         }
     }
 
-    private fun loadWebViewFragment(route: String, title: String?, ignoreSafeArea: Boolean) {
+    private fun loadWebViewFragment(route: String) {
         supportFragmentManager.beginTransaction().apply {
             val fragment = WebViewFragment.newInstance(
                 route = route,
-                title = title,
-                ignoreSafeArea = ignoreSafeArea,
                 isBottomMenu = false,
             )
             replace(binding.fragmentContainer.id, fragment, route)

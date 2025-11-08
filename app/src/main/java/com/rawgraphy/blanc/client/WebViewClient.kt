@@ -66,15 +66,13 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun push(screen: String) {
         Log.d("WebAppInterface", "screen = $screen")
-        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
-        receiver.push(routeInfo)
+        receiver.push(screen)
     }
 
     @JavascriptInterface
     fun fullSheet(screen: String) {
         Log.d("WebAppInterface", "screen = $screen")
-        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
-        receiver.fullSheet(routeInfo)
+        receiver.fullSheet(screen)
     }
 
     @JavascriptInterface
@@ -85,8 +83,7 @@ class WebAppInterface(val receiver: EventReceiver) {
     @JavascriptInterface
     fun clearAndPush(screen: String) {
         Log.d("WebAppInterface", "screen = $screen")
-        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
-        receiver.pushAndAllClear(routeInfo)
+        receiver.pushAndAllClear(screen)
     }
 
     @JavascriptInterface

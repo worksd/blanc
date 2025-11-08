@@ -2,15 +2,14 @@ package com.rawgraphy.blanc.client
 
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
-import com.rawgraphy.blanc.data.RouteInfo
 
 interface EventReceiver {
     fun replace(route: String)
-    fun push(routeInfo: RouteInfo)
+    fun push(routeInfo: String)
     fun showToast(message: String)
-    fun fullSheet(routeInfo: RouteInfo)
+    fun fullSheet(routeInfo: String)
     fun navigateMain(bootInfo: String)
-    fun pushAndAllClear(routeInfo: RouteInfo)
+    fun pushAndAllClear(routeInfo: String)
     fun back()
     fun clearToken()
     fun sendHapticFeedback()

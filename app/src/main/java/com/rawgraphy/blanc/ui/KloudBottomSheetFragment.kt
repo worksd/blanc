@@ -40,16 +40,13 @@ class KloudBottomSheetFragment : DialogFragment() {
 
     private fun initView() {
         val screen = arguments?.getString(ARG_ROUTE) ?: return
-        val routeInfo = Gson().fromJson(screen, RouteInfo::class.java)
         val fragment = WebViewFragment.newInstance(
-            route = routeInfo.route,
-            title = null,
-            ignoreSafeArea = false,
+            route = screen,
             isBottomMenu = false
         )
         childFragmentManager.beginTransaction()
             .setReorderingAllowed(true)
-            .replace(binding.fragmentContainer.id, fragment, routeInfo.route)
+            .replace(binding.fragmentContainer.id, fragment, screen)
             .commit()
     }
 

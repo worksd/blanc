@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import com.google.gson.Gson
 import com.rawgraphy.blanc.data.BootInfoResponse
 import com.rawgraphy.blanc.data.BottomMenuResponse
+import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -42,12 +43,17 @@ class MainActivity : AppCompatActivity() {
             if (bootInfo != null) {
                 lifecycleScope.launch {
                     addMainFragment(bootInfo.bottomMenuList)
-                    if (!bootInfo.routeInfo?.route.isNullOrEmpty()) {
-                        val intent = Intent(this@MainActivity, WebViewActivity::class.java)
-                        intent.putExtra("route", bootInfo.routeInfo.route)
-                        intent.putExtra("title", bootInfo.routeInfo.title)
-                        intent.putExtra("ignoreSafeArea", bootInfo.routeInfo.ignoreSafeArea)
-                        startActivity(intent)
+                    try {
+                        val routeInfo = Gson().fromJson(bootInfo.route, RouteInfo::class.java)
+                        if (!routeInfo.route.isEmpty()) {
+                            val intent = Intent(this@MainActivity, WebViewActivity::class.java)
+                            intent.putExtra("route", routeInfo.route)
+                            intent.putExtra("title", routeInfo.title)
+                            intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
+                            startActivity(intent)
+                        }
+                    } catch (e: Throwable) {
+
                     }
                 }
             }
@@ -120,8 +126,6 @@ class MainActivity : AppCompatActivity() {
                 val fragment = WebViewFragment.newInstance(
                     route = it.page.route,
                     isBottomMenu = true,
-                    ignoreSafeArea = false,
-                    title = null,
                 )
                 supportFragmentManager.beginTransaction().apply {
                     add(binding.fragmentContainer.id, fragment, it.page.route)
