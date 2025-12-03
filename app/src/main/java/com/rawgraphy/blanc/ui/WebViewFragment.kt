@@ -66,6 +66,7 @@ import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
 import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
+import com.rawgraphy.blanc.util.getInstallationId
 import com.rawgraphy.blanc.util.refreshWebView
 import dagger.hilt.android.AndroidEntryPoint
 import io.portone.sdk.android.PortOne
@@ -528,9 +529,9 @@ class WebViewFragment : Fragment() {
                         val pInfo =
                             context.packageManager.getPackageInfo(context.packageName, 0)
                         val version = pInfo.versionName
-
+                        val deviceId = getInstallationId(requireContext())
                         val newUserAgent =
-                            "${settings.userAgentString} KloudNativeClient/${version}"
+                            "${settings.userAgentString} KloudNativeClient/${version}/${deviceId}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
