@@ -607,7 +607,8 @@ class WebViewFragment : Fragment() {
                     method = PaymentMethod.Card(), // 결제수단 관련 정보
                     customer = Customer(
                         name = Customer.Name.Full(paymentInfo.userId),
-                    )
+                    ),
+                    customData = paymentInfo.customData.orEmpty()
                 ),
                 resultLauncher = paymentActivityResultLauncher
             )

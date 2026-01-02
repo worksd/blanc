@@ -17,4 +17,6 @@ data class PaymentInfo(
     val price: Long,
     @SerializedName("userId")
     val userId: String,
+    @SerializedName("customData")
+    val customData: String?,
 )
