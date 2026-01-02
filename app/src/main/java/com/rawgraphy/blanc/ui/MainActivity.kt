@@ -39,17 +39,14 @@ class MainActivity : AppCompatActivity() {
         try {
             val bootInfo =
                 Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
-            Log.d("WebAppInterface", "bootInfo = $bootInfo")
             if (bootInfo != null) {
                 lifecycleScope.launch {
                     addMainFragment(bootInfo.bottomMenuList)
                     try {
                         val routeInfo = Gson().fromJson(bootInfo.route, RouteInfo::class.java)
-                        if (!routeInfo.route.isEmpty()) {
+                        if (routeInfo.route?.isEmpty() == false) {
                             val intent = Intent(this@MainActivity, WebViewActivity::class.java)
-                            intent.putExtra("route", routeInfo.route)
-                            intent.putExtra("title", routeInfo.title)
-                            intent.putExtra("ignoreSafeArea", routeInfo.ignoreSafeArea)
+                            intent.putExtra("route", bootInfo.route)
                             startActivity(intent)
                         }
                     } catch (e: Throwable) {
@@ -124,11 +121,11 @@ class MainActivity : AppCompatActivity() {
 
             bottomMenuList.reversed().forEach {
                 val fragment = WebViewFragment.newInstance(
-                    route = it.page.route,
+                    route = it.page.route.route.orEmpty(),
                     isBottomMenu = true,
                 )
                 supportFragmentManager.beginTransaction().apply {
-                    add(binding.fragmentContainer.id, fragment, it.page.route)
+                    add(binding.fragmentContainer.id, fragment, it.page.route.route)
                     commit()
                 }
             }
@@ -140,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
             LaunchedEffect(bottomMenuList) {
                 if (currentSelectedRoute.isEmpty()) {
-                    viewModel.selectBottomMenu(bottomMenuList.firstOrNull()?.page?.route.orEmpty())
+                    viewModel.selectBottomMenu(bottomMenuList.firstOrNull()?.page?.route?.route.orEmpty())
                 }
             }
             BottomNavigation(

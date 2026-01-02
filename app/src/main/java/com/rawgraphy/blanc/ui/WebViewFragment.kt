@@ -137,7 +137,7 @@ class WebViewFragment : Fragment() {
 
         try {
             val routeInfo = Gson().fromJson(routeArguments, RouteInfo::class.java)
-            route = routeInfo.route
+            route = routeInfo.route.orEmpty()
             title = routeInfo.title
             ignoreSafeArea = routeInfo.ignoreSafeArea
         } catch (e: Throwable) {

@@ -16,8 +16,8 @@ android {
         applicationId = "com.rawgraphy.blanc"
         minSdk = 26
         targetSdk = 36
-        versionCode = 25
-        versionName = "1.0.25"
+        versionCode = 27
+        versionName = "1.0.27"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -103,7 +103,7 @@ dependencies {
     implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
 
     // PortOne
-    implementation("com.github.portone-io:android-sdk:0.1.0")
+    implementation("com.github.portone-io:android-sdk:0.1.3")
 
     // Desugar
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.2")

@@ -8,12 +8,12 @@ data class BootInfoResponse(
     @SerializedName("bottomMenuList")
     val bottomMenuList: List<BottomMenuResponse>,
     @SerializedName("route")
-    val route: String,
+    val route: String?,
 )
 
 data class RouteInfo(
     @SerializedName("route")
-    val route: String,
+    val route: String?,
     @SerializedName("ignoreSafeArea")
     val ignoreSafeArea: Boolean,
     @SerializedName("title")
@@ -40,8 +40,8 @@ data class BottomMenuResponse(
 
 @Keep
 data class PageInitResponse(
-    @SerializedName("route")
-    val route: String,
+    @SerializedName("routeInfo")
+    val route: RouteInfo,
     @SerializedName("initialColor")
     val initialColor: String
 )
