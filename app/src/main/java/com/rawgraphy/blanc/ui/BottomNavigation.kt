@@ -53,7 +53,7 @@ fun BottomNavigation(
                             indication = null,
                             interactionSource = remember { MutableInteractionSource() }
                         ) {
-                            onClick(item.page.route.route.orEmpty())
+                            onClick(item.page.route)
                         },
                     currentSelectedRoute = currentSelectedRoute,
                     item = item,
@@ -72,7 +72,7 @@ fun BottomNavigationItem(
     imageLoader: ImageLoader,
 ) {
     // color를 remember로 계산
-    val isSelected = currentSelectedRoute == item.page.route.route
+    val isSelected = currentSelectedRoute == item.page.route
     val color = remember(isSelected) {
         if (isSelected) Color.Black else Color(0xFF86898C)
     }

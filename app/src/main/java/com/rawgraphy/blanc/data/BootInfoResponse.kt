@@ -40,8 +40,8 @@ data class BottomMenuResponse(
 
 @Keep
 data class PageInitResponse(
-    @SerializedName("routeInfo")
-    val route: RouteInfo,
+    @SerializedName("route")
+    val route: String,
     @SerializedName("initialColor")
     val initialColor: String
 )

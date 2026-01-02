@@ -535,7 +535,7 @@ class WebViewFragment : Fragment() {
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-//                        loadUrl("http://192.168.45.206:3000$pageRoute")
+//                        loadUrl("http://192.168.45.134:3000$pageRoute")
 
                     }
                 }

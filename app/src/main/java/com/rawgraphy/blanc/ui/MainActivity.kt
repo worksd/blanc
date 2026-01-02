@@ -121,11 +121,11 @@ class MainActivity : AppCompatActivity() {
 
             bottomMenuList.reversed().forEach {
                 val fragment = WebViewFragment.newInstance(
-                    route = it.page.route.route.orEmpty(),
+                    route = it.page.route,
                     isBottomMenu = true,
                 )
                 supportFragmentManager.beginTransaction().apply {
-                    add(binding.fragmentContainer.id, fragment, it.page.route.route)
+                    add(binding.fragmentContainer.id, fragment, it.page.route)
                     commit()
                 }
             }
@@ -137,7 +137,7 @@ class MainActivity : AppCompatActivity() {
 
             LaunchedEffect(bottomMenuList) {
                 if (currentSelectedRoute.isEmpty()) {
-                    viewModel.selectBottomMenu(bottomMenuList.firstOrNull()?.page?.route?.route.orEmpty())
+                    viewModel.selectBottomMenu(bottomMenuList.firstOrNull()?.page?.route.orEmpty())
                 }
             }
             BottomNavigation(
