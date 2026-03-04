@@ -89,6 +89,18 @@ fun WebView.onErrorInvoked(activity: Activity, code: String) {
     }
 }
 
+fun WebView.onCameraPermissionResult(activity: Activity, granted: Boolean) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onCameraPermissionResult")
+        this.loadUrl(
+            createJavaScriptFunction(
+                "onCameraPermissionResult",
+                mapOf("granted" to granted)
+            )
+        )
+    }
+}
+
 fun WebView.onFcmTokenComplete(activity: Activity, fcmToken: String, udid: String) {
     activity.runOnUiThread {
         Log.d("WebAppInterface", "onFcmTokenComplete")

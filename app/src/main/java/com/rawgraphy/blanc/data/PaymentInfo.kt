@@ -19,4 +19,6 @@ data class PaymentInfo(
     val userId: String,
     @SerializedName("customData")
     val customData: String?,
+    @SerializedName("locale")
+    val locale: String?,
 )

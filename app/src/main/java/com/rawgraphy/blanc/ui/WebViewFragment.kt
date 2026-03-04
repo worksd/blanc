@@ -1,7 +1,9 @@
 package com.rawgraphy.blanc.ui
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
@@ -14,6 +16,8 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -51,6 +55,7 @@ import com.rawgraphy.blanc.client.CustomWebViewClient
 import com.rawgraphy.blanc.client.EventReceiver
 import com.rawgraphy.blanc.client.WebAppInterface
 import com.rawgraphy.blanc.client.WebViewListener
+import com.rawgraphy.blanc.client.onCameraPermissionResult
 import com.rawgraphy.blanc.client.onDialogConfirm
 import com.rawgraphy.blanc.client.onErrorInvoked
 import com.rawgraphy.blanc.client.onFcmTokenComplete
@@ -76,6 +81,7 @@ import io.portone.sdk.android.payment.PaymentResponse
 import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.Customer
+import io.portone.sdk.android.type.Locale
 import io.portone.sdk.android.type.PaymentMethod
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -121,6 +127,11 @@ class WebViewFragment : Fragment() {
                 )
             }
         })
+
+    private val cameraPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+            binding.webView.onCameraPermissionResult(requireActivity(), granted)
+        }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -524,6 +535,20 @@ class WebViewFragment : Fragment() {
                                 viewModel.refresh(endpoint)
                             }
 
+                            override fun requestCameraPermission() {
+                                requireActivity().runOnUiThread {
+                                    val permission = Manifest.permission.CAMERA
+                                    when {
+                                        ContextCompat.checkSelfPermission(requireContext(), permission) == PackageManager.PERMISSION_GRANTED -> {
+                                            binding.webView.onCameraPermissionResult(requireActivity(), true)
+                                        }
+                                        else -> {
+                                            cameraPermissionLauncher.launch(permission)
+                                        }
+                                    }
+                                }
+                            }
+
                         }), "KloudEvent")
 
                         val pInfo =
@@ -608,7 +633,12 @@ class WebViewFragment : Fragment() {
                     customer = Customer(
                         name = Customer.Name.Full(paymentInfo.userId),
                     ),
-                    customData = paymentInfo.customData.orEmpty()
+                    customData = paymentInfo.customData.orEmpty(),
+                    locale = when (paymentInfo.locale) {
+                        "EN_US" -> Locale.EN_US
+                        "ZH_CN" -> Locale.ZH_CN
+                        else -> Locale.KO_KR
+                    },
                 ),
                 resultLauncher = paymentActivityResultLauncher
             )

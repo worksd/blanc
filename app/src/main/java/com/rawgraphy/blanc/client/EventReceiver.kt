@@ -23,4 +23,5 @@ interface EventReceiver {
     fun changeWebEndpoint(endpoint: String)
     fun openExternalBrowser(url: String)
     fun refresh(endpoint: String)
+    fun requestCameraPermission()
 }

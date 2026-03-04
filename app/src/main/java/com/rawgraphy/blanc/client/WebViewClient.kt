@@ -158,4 +158,9 @@ class WebAppInterface(val receiver: EventReceiver) {
     fun refresh(endpoint: String) {
         receiver.refresh(endpoint)
     }
+
+    @JavascriptInterface
+    fun requestCameraPermission() {
+        receiver.requestCameraPermission()
+    }
 }
