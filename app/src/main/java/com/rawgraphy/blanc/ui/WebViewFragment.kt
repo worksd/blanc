@@ -79,10 +79,12 @@ import io.portone.sdk.android.payment.PaymentCallback
 import io.portone.sdk.android.payment.PaymentRequest
 import io.portone.sdk.android.payment.PaymentResponse
 import io.portone.sdk.android.type.Amount
+import io.portone.sdk.android.type.BirthDate
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.Customer
 import io.portone.sdk.android.type.Locale
 import io.portone.sdk.android.type.PaymentMethod
+import io.portone.sdk.android.type.PgProvider
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -365,6 +367,7 @@ class WebViewFragment : Fragment() {
                         displayZoomControls = false
                         allowContentAccess = true
                         domStorageEnabled = true
+                        settings.mediaPlaybackRequiresUserGesture = false
                         val kloudWebChromeClient = object : WebChromeClient() {
                             override fun onConsoleMessage(consoleMessage: ConsoleMessage?): Boolean {
                                 Log.d(
@@ -372,6 +375,14 @@ class WebViewFragment : Fragment() {
                                     "onConsoleMessage: ${consoleMessage?.message()}"
                                 )
                                 return super.onConsoleMessage(consoleMessage)
+                            }
+
+                            override fun onPermissionRequest(request: android.webkit.PermissionRequest?) {
+                                request?.let {
+                                    requireActivity().runOnUiThread {
+                                        it.grant(it.resources)
+                                    }
+                                }
                             }
                         }
                         webChromeClient = kloudWebChromeClient
@@ -629,9 +640,12 @@ class WebViewFragment : Fragment() {
                     paymentId = paymentInfo.paymentId,
                     orderName = paymentInfo.orderName,
                     amount = Amount(total = paymentInfo.price, currency = Currency.KRW), // 금액
-                    method = PaymentMethod.Card(), // 결제수단 관련 정보
+                    method = PaymentMethod.Card(),
                     customer = Customer(
-                        name = Customer.Name.Full(paymentInfo.userId),
+                        id = paymentInfo.userId,
+                        name = Customer.Name.Full(paymentInfo.userName),
+                        phoneNumber = paymentInfo.userPhone,
+                        birthDate = getBirthDate(paymentInfo.userBirth),
                     ),
                     customData = paymentInfo.customData.orEmpty(),
                     locale = when (paymentInfo.locale) {
@@ -639,11 +653,34 @@ class WebViewFragment : Fragment() {
                         "ZH_CN" -> Locale.ZH_CN
                         else -> Locale.KO_KR
                     },
+                    pgProvider = getPgProvider(paymentInfo.pgProvider),
                 ),
                 resultLauncher = paymentActivityResultLauncher
             )
         } catch (e: Throwable) {
             Log.d("WebAppInterface", "requestPayment: ${e.message}")
+        }
+    }
+
+    // birth는 yyMMdd ex 941222
+    private fun getBirthDate(birth: String?): BirthDate? {
+        if (birth.isNullOrEmpty() || birth.length != 6) return null
+        val year = birth.substring(0, 2).toIntOrNull() ?: return null
+        val month = birth.substring(2, 4).toIntOrNull() ?: return null
+        val day = birth.substring(4, 6).toIntOrNull() ?: return null
+        val fullYear = if (year <= 26) 2000 + year else 1900 + year
+        return BirthDate(birthYear = fullYear, birthMonth = month, birthDay = day)
+    }
+
+    // pgProvider는 TossPayments, NaverPay, KakaoPay, AliPay, WeChatPay
+    private fun getPgProvider(pgProvider: String?): PgProvider? {
+        return when (pgProvider) {
+            "TossPayments" -> PgProvider.TOSSPAYMENTS
+            "NaverPay" -> PgProvider.NAVERPAY
+            "KakaoPay" -> PgProvider.KAKAOPAY
+            "AliPay" -> PgProvider.ALIPAY
+            "WeChatPay" -> PgProvider.EXIMBAY
+            else -> null
         }
     }
 

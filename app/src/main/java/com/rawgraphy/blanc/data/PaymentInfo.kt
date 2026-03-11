@@ -17,8 +17,16 @@ data class PaymentInfo(
     val price: Long,
     @SerializedName("userId")
     val userId: String,
+    @SerializedName("userName")
+    val userName: String,
+    @SerializedName("userBirth")
+    val userBirth: String,
+    @SerializedName("userPhone")
+    val userPhone: String,
     @SerializedName("customData")
     val customData: String?,
     @SerializedName("locale")
     val locale: String?,
+    @SerializedName("pgProvider")
+    val pgProvider: String?,
 )
