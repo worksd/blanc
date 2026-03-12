@@ -18,11 +18,11 @@ data class PaymentInfo(
     @SerializedName("userId")
     val userId: String,
     @SerializedName("userName")
-    val userName: String,
+    val userName: String?,
     @SerializedName("userBirth")
-    val userBirth: String,
+    val userBirth: String?,
     @SerializedName("userPhone")
-    val userPhone: String,
+    val userPhone: String?,
     @SerializedName("customData")
     val customData: String?,
     @SerializedName("locale")

@@ -645,7 +645,7 @@ class WebViewFragment : Fragment() {
                     method = PaymentMethod.Card(),
                     customer = Customer(
                         id = paymentInfo.userId,
-                        name = Customer.Name.Full(paymentInfo.userName),
+                        name = paymentInfo.userName?.let { Customer.Name.Full(it) },
                         phoneNumber = paymentInfo.userPhone,
                         birthDate = getBirthDate(paymentInfo.userBirth),
                     ),
