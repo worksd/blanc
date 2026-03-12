@@ -574,7 +574,7 @@ class WebViewFragment : Fragment() {
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-
+//                        loadUrl("http://192.168.45.88:3002$pageRoute")
                     }
                 }
             }
@@ -647,7 +647,6 @@ class WebViewFragment : Fragment() {
                         id = paymentInfo.userId,
                         name = paymentInfo.userName?.let { Customer.Name.Full(it) },
                         phoneNumber = paymentInfo.userPhone,
-                        birthDate = getBirthDate(paymentInfo.userBirth),
                     ),
                     customData = paymentInfo.customData.orEmpty(),
                     locale = when (paymentInfo.locale) {
@@ -655,37 +654,14 @@ class WebViewFragment : Fragment() {
                         "ZH_CN" -> Locale.ZH_CN
                         else -> Locale.KO_KR
                     },
-                    pgProvider = getPgProvider(paymentInfo.pgProvider),
-                ),
+                    ),
                 resultLauncher = paymentActivityResultLauncher
             )
         } catch (e: Throwable) {
-            Log.d("WebAppInterface", "requestPayment: ${e.message}")
+            Log.e("WebAppInterface", "requestPayment error: ${e.message}", e)
+            onErrorInvoked(code = e.message ?: "UNKNOWN_ERROR")
         }
     }
-
-    // birth는 yyMMdd ex 941222
-    private fun getBirthDate(birth: String?): BirthDate? {
-        if (birth.isNullOrEmpty() || birth.length != 6) return null
-        val year = birth.substring(0, 2).toIntOrNull() ?: return null
-        val month = birth.substring(2, 4).toIntOrNull() ?: return null
-        val day = birth.substring(4, 6).toIntOrNull() ?: return null
-        val fullYear = if (year <= 26) 2000 + year else 1900 + year
-        return BirthDate(birthYear = fullYear, birthMonth = month, birthDay = day)
-    }
-
-    // pgProvider는 TossPayments, NaverPay, KakaoPay, AliPay, WeChatPay
-    private fun getPgProvider(pgProvider: String?): PgProvider? {
-        return when (pgProvider) {
-            "TossPayments" -> PgProvider.TOSSPAYMENTS
-            "NaverPay" -> PgProvider.NAVERPAY
-            "KakaoPay" -> PgProvider.KAKAOPAY
-            "AliPay" -> PgProvider.ALIPAY
-            "WeChatPay" -> PgProvider.EXIMBAY
-            else -> null
-        }
-    }
-
     private fun showSimpleDialog(title: String, message: String?) {
         val dialog = KloudDialog.newInstance(
             id = "Error",
