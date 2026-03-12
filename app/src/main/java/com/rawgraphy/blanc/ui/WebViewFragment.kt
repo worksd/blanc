@@ -397,6 +397,9 @@ class WebViewFragment : Fragment() {
 
                                 override fun onPageFinished() {
                                     cookieManager.flush()
+                                    requireActivity().runOnUiThread {
+                                        binding.progressBar.visibility = View.GONE
+                                    }
                                 }
                             })
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
@@ -571,7 +574,6 @@ class WebViewFragment : Fragment() {
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
                         loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-//                        loadUrl("http://192.168.45.206:3000$pageRoute")
 
                     }
                 }
