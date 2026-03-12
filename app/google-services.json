@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1019972753125",
+    "project_id": "rawgraphy-1bcbc",
+    "storage_bucket": "rawgraphy-1bcbc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019972753125:android:14e7f86c214f734cf0260c",
+        "android_client_info": {
+          "package_name": "com.rawgraphy.blanc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBihjFnUb0GQeFZPoO9PjxyGSzSoXPvRHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1019972753125:android:f073caddd494ae7ff0260c",
+        "android_client_info": {
+          "package_name": "com.rawgraphy.blanc"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBihjFnUb0GQeFZPoO9PjxyGSzSoXPvRHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
