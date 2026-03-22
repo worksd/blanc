@@ -399,13 +399,16 @@ class WebViewFragment : Fragment() {
 
                                 override fun onPageFinished() {
                                     cookieManager.flush()
-                                    requireActivity().runOnUiThread {
-                                        binding.progressBar.visibility = View.GONE
+                                    if (isAdded) {
+                                        requireActivity().runOnUiThread {
+                                            binding.progressBar.visibility = View.GONE
+                                        }
                                     }
                                 }
                             })
                         addJavascriptInterface(WebAppInterface(object : EventReceiver {
                             override fun showToast(message: String) {
+                                if (!isAdded) return
                                 toast?.cancel()
                                 toast =
                                     Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT)
@@ -448,14 +451,17 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun sendHapticFeedback() {
+                                if (!isAdded) return
                                 requireView().performHapticFeedback(HapticFeedbackConstants.VIRTUAL_KEY)
                             }
 
                             override fun sendKakaoLogin() {
+                                if (!isAdded) return
                                 viewModel.kakaoLogin(requireContext())
                             }
 
                             override fun sendGoogleLogin(configuration: GoogleLoginConfiguration) {
+                                if (!isAdded) return
                                 Log.d("WebAppInterface", "sendGoogleLogin: $configuration")
                                 viewModel.googleLogin(
                                     context = requireContext(),
@@ -525,10 +531,11 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun sendFcmToken() {
+                                if (!isAdded) return
                                 try {
                                     FirebaseMessaging.getInstance().token.addOnCompleteListener(
                                         OnCompleteListener { task ->
-                                            if (!task.isSuccessful) {
+                                            if (!task.isSuccessful || !isAdded) {
                                                 return@OnCompleteListener
                                             }
                                             val token = task.result
@@ -552,6 +559,7 @@ class WebViewFragment : Fragment() {
                             }
 
                             override fun requestCameraPermission() {
+                                if (!isAdded) return
                                 requireActivity().runOnUiThread {
                                     val permission = Manifest.permission.CAMERA
                                     when {
