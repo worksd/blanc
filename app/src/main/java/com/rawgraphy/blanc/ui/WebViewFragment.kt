@@ -7,6 +7,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import com.google.firebase.crashlytics.ktx.crashlytics
+import com.google.firebase.ktx.Firebase
 import android.view.HapticFeedbackConstants
 import android.view.LayoutInflater
 import android.view.View
@@ -659,6 +661,7 @@ class WebViewFragment : Fragment() {
             )
         } catch (e: Throwable) {
             Log.e("WebAppInterface", "requestPayment error: ${e.message}", e)
+            Firebase.crashlytics.recordException(e)
             onErrorInvoked(code = e.message ?: "UNKNOWN_ERROR")
         }
     }

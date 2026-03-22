@@ -4,6 +4,7 @@ plugins {
     id("kotlin-kapt")
     id("dagger.hilt.android.plugin")
     id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
     id("org.jetbrains.kotlin.plugin.compose") version "2.1.0"   // ✅ 추가 (필수)
 
 }
@@ -16,8 +17,8 @@ android {
         applicationId = "com.rawgraphy.blanc"
         minSdk = 26
         targetSdk = 36
-        versionCode = 34
-        versionName = "1.0.34"
+        versionCode = 35
+        versionName = "1.0.35"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
@@ -102,6 +103,7 @@ dependencies {
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
     implementation("com.google.firebase:firebase-messaging")
 
     // Kakao
