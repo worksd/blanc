@@ -43,5 +43,7 @@ data class PageInitResponse(
     @SerializedName("route")
     val route: String,
     @SerializedName("initialColor")
-    val initialColor: String
+    val initialColor: String,
+    @SerializedName("ignoreSafeArea")
+    val ignoreSafeArea: Boolean = false
 )

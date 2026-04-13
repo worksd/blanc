@@ -29,4 +29,6 @@ data class PaymentInfo(
     val locale: String?,
     @SerializedName("pgProvider")
     val pgProvider: String?,
+    @SerializedName("method")
+    val method: String?,
 )

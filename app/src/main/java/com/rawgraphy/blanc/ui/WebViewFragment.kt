@@ -84,6 +84,8 @@ import io.portone.sdk.android.type.Amount
 import io.portone.sdk.android.type.BirthDate
 import io.portone.sdk.android.type.Currency
 import io.portone.sdk.android.type.Customer
+import io.portone.sdk.android.type.EasyPayPaymentMethod
+import io.portone.sdk.android.type.EasyPayProvider
 import io.portone.sdk.android.type.Locale
 import io.portone.sdk.android.type.PaymentMethod
 import io.portone.sdk.android.type.PgProvider
@@ -643,6 +645,19 @@ class WebViewFragment : Fragment() {
 
     private fun requestPayment(paymentInfo: PaymentInfo) {
         Log.d("WebAppInterface", "requestPayment: $paymentInfo")
+        Log.d("WebAppInterface", "method=${paymentInfo.method}, channelKey=${paymentInfo.channelKey}, storeId=${paymentInfo.storeId}, price=${paymentInfo.price}")
+        val method: PaymentMethod = when (paymentInfo.method?.lowercase()) {
+            "kakaopay" -> PaymentMethod.EasyPay(easyPayProvider = EasyPayProvider.KAKAOPAY)
+            "naverpay" -> PaymentMethod.EasyPay(
+                easyPayProvider = EasyPayProvider.NAVERPAY,
+                availablePayMethods = listOf(EasyPayPaymentMethod.CARD)
+            )
+            "tosspay" -> PaymentMethod.EasyPay(
+                easyPayProvider = EasyPayProvider.TOSSPAY,
+                availablePayMethods = listOf(EasyPayPaymentMethod.CARD)
+            )
+            else -> PaymentMethod.Card()
+        }
         try {
             PortOne.requestPayment(
                 requireActivity(),
@@ -652,19 +667,20 @@ class WebViewFragment : Fragment() {
                     paymentId = paymentInfo.paymentId,
                     orderName = paymentInfo.orderName,
                     amount = Amount(total = paymentInfo.price, currency = Currency.KRW), // 금액
-                    method = PaymentMethod.Card(),
+                    method = method,
                     customer = Customer(
                         id = paymentInfo.userId,
                         name = paymentInfo.userName?.let { Customer.Name.Full(it) },
                         phoneNumber = paymentInfo.userPhone,
                     ),
+                    appScheme = "rawgraphy",
                     customData = paymentInfo.customData.orEmpty(),
                     locale = when (paymentInfo.locale) {
                         "EN_US" -> Locale.EN_US
                         "ZH_CN" -> Locale.ZH_CN
                         else -> Locale.KO_KR
                     },
-                    ),
+                ),
                 resultLauncher = paymentActivityResultLauncher
             )
         } catch (e: Throwable) {

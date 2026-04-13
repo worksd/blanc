@@ -120,8 +120,15 @@ class MainActivity : AppCompatActivity() {
             }
 
             bottomMenuList.reversed().forEach {
+                val routeJson = Gson().toJson(
+                    RouteInfo(
+                        route = it.page.route,
+                        ignoreSafeArea = it.page.ignoreSafeArea,
+                        title = null,
+                    )
+                )
                 val fragment = WebViewFragment.newInstance(
-                    route = it.page.route,
+                    route = routeJson,
                     isBottomMenu = true,
                 )
                 supportFragmentManager.beginTransaction().apply {
