@@ -11,6 +11,9 @@
 
     <queries>
 
+        <!-- KIS-ANDAGT (POS VAN Agent) -->
+        <package android:name="kr.co.kisvan.andagent" />
+
         <!-- 간편결제 -->
         <package android:name="com.kftc.bankpay.android" /> <!-- 뱅크페이 -->
         <package android:name="com.nhnent.payapp" /> <!-- 페이코 -->
@@ -140,6 +143,18 @@
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
             android:value="false" />
+
+        <receiver
+            android:name=".admin.BlancDeviceAdminReceiver"
+            android:permission="android.permission.BIND_DEVICE_ADMIN"
+            android:exported="true">
+            <meta-data
+                android:name="android.app.device_admin"
+                android:resource="@xml/device_admin_receiver" />
+            <intent-filter>
+                <action android:name="android.app.action.DEVICE_ADMIN_ENABLED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 

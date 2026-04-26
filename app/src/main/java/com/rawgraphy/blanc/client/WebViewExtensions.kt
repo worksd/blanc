@@ -4,6 +4,7 @@ import android.app.Activity
 import android.util.Log
 import android.webkit.WebView
 import com.google.gson.Gson
+import com.google.gson.JsonObject
 import com.rawgraphy.blanc.data.KloudDialogInfo
 
 fun WebView.onKakaoLoginSuccess(activity: Activity, code: String) {
@@ -98,6 +99,21 @@ fun WebView.onCameraPermissionResult(activity: Activity, granted: Boolean) {
                 mapOf("granted" to granted)
             )
         )
+    }
+}
+
+fun WebView.onKisPaymentResult(activity: Activity, result: JsonObject) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onKisPaymentResult: $result")
+        this.loadUrl("javascript:onKisPaymentResult($result)")
+    }
+}
+
+fun WebView.onKioskModeResult(activity: Activity, state: com.rawgraphy.blanc.util.KioskState) {
+    activity.runOnUiThread {
+        val json = Gson().toJson(state)
+        Log.d("WebAppInterface", "onKioskModeResult: $json")
+        this.loadUrl("javascript:onKioskModeResult($json)")
     }
 }
 

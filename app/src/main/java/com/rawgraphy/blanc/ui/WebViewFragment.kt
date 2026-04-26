@@ -64,12 +64,16 @@ import com.rawgraphy.blanc.client.onFcmTokenComplete
 import com.rawgraphy.blanc.client.onGoogleLoginSuccess
 import com.rawgraphy.blanc.client.onHideDialog
 import com.rawgraphy.blanc.client.onKakaoLoginSuccess
+import com.rawgraphy.blanc.client.onKioskModeResult
+import com.rawgraphy.blanc.client.onKisPaymentResult
 import com.rawgraphy.blanc.client.onPaymentSuccess
+import com.rawgraphy.blanc.payment.kis.KisAgentLauncher
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
 import com.rawgraphy.blanc.data.PaymentInfo
 import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
+import com.rawgraphy.blanc.util.KioskMode
 import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
@@ -138,6 +142,11 @@ class WebViewFragment : Fragment() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
             binding.webView.onCameraPermissionResult(requireActivity(), granted)
         }
+
+    private val kisAgentLauncher = KisAgentLauncher(this) { result ->
+        if (!isAdded) return@KisAgentLauncher
+        binding.webView.onKisPaymentResult(requireActivity(), result)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -532,6 +541,26 @@ class WebViewFragment : Fragment() {
                                 requestPayment(paymentInfo)
                             }
 
+                            override fun requestKisPayment(command: String) {
+                                kisAgentLauncher.launch(command)
+                            }
+
+                            override fun enterKioskMode() {
+                                if (!isAdded) return
+                                KioskMode.enter(requireActivity()) { state ->
+                                    if (!isAdded) return@enter
+                                    binding.webView.onKioskModeResult(requireActivity(), state)
+                                }
+                            }
+
+                            override fun exitKioskMode() {
+                                if (!isAdded) return
+                                KioskMode.exit(requireActivity()) { state ->
+                                    if (!isAdded) return@exit
+                                    binding.webView.onKioskModeResult(requireActivity(), state)
+                                }
+                            }
+
                             override fun sendFcmToken() {
                                 if (!isAdded) return
                                 try {
@@ -585,8 +614,8 @@ class WebViewFragment : Fragment() {
                             "${settings.userAgentString} KloudNativeClient/${version}/${deviceId}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
-                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-//                        loadUrl("http://192.168.45.88:3002$pageRoute")
+//                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
+                        loadUrl("http://192.168.45.37:3001$pageRoute")
                     }
                 }
             }

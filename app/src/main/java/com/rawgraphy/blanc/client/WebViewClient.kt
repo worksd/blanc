@@ -135,6 +135,24 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
+    fun requestKisPayment(command: String) {
+        Log.d(TAG, "requestKisPayment: $command")
+        receiver.requestKisPayment(command)
+    }
+
+    @JavascriptInterface
+    fun enterKioskMode() {
+        Log.d(TAG, "enterKioskMode")
+        receiver.enterKioskMode()
+    }
+
+    @JavascriptInterface
+    fun exitKioskMode() {
+        Log.d(TAG, "exitKioskMode")
+        receiver.exitKioskMode()
+    }
+
+    @JavascriptInterface
     fun registerDevice() {
         receiver.sendFcmToken()
     }
