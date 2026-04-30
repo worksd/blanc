@@ -67,7 +67,11 @@ import com.rawgraphy.blanc.client.onKakaoLoginSuccess
 import com.rawgraphy.blanc.client.onKioskModeResult
 import com.rawgraphy.blanc.client.onKisPaymentResult
 import com.rawgraphy.blanc.client.onPaymentSuccess
+import com.rawgraphy.blanc.client.onQrScanResult
+import com.rawgraphy.blanc.client.onSerialPrintResult
 import com.rawgraphy.blanc.payment.kis.KisAgentLauncher
+import com.rawgraphy.blanc.payment.serial.HidScannerCapture
+import com.rawgraphy.blanc.payment.serial.SerialPrinter
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
 import com.rawgraphy.blanc.data.KloudDialogInfo
 import com.rawgraphy.blanc.data.PaymentInfo
@@ -75,6 +79,7 @@ import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.FragmentWebViewBinding
 import com.rawgraphy.blanc.util.KioskMode
 import com.rawgraphy.blanc.util.KloudWebUrlProvider
+import com.rawgraphy.blanc.util.KioskTokenKey
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
 import com.rawgraphy.blanc.util.getInstallationId
@@ -545,6 +550,36 @@ class WebViewFragment : Fragment() {
                                 kisAgentLauncher.launch(command)
                             }
 
+                            override fun requestSerialPrint(command: String) {
+                                if (!isAdded) return
+                                SerialPrinter.print(command) { result ->
+                                    if (!isAdded) return@print
+                                    binding.webView.onSerialPrintResult(requireActivity(), result)
+                                }
+                            }
+
+                            override fun startQrScan(command: String) {
+                                if (!isAdded) return
+                                HidScannerCapture.start { result ->
+                                    if (!isAdded) return@start
+                                    binding.webView.onQrScanResult(requireActivity(), result)
+                                }
+                            }
+
+                            override fun stopQrScan() {
+                                if (!isAdded) return
+                                HidScannerCapture.stop { result ->
+                                    if (!isAdded) return@stop
+                                    binding.webView.onQrScanResult(requireActivity(), result)
+                                }
+                            }
+
+                            override fun saveKioskToken(token: String) {
+                                if (!isAdded) return
+                                PrefUtils(requireContext().applicationContext)
+                                    .setString(KioskTokenKey, token)
+                            }
+
                             override fun enterKioskMode() {
                                 if (!isAdded) return
                                 KioskMode.enter(requireActivity()) { state ->
@@ -614,8 +649,10 @@ class WebViewFragment : Fragment() {
                             "${settings.userAgentString} KloudNativeClient/${version}/${deviceId}"
                         settings.userAgentString = newUserAgent
                         webViewClient = customWebViewClient
-//                        loadUrl(KloudWebUrlProvider.getUrl(requireContext(), pageRoute))
-                        loadUrl("http://192.168.45.37:3001$pageRoute")
+                        val storedToken = PrefUtils(requireContext().applicationContext)
+                            .getString(KioskTokenKey)
+//                        loadUrl(appendKioskToken(KloudWebUrlProvider.getUrl(requireContext(), pageRoute), storedToken))
+                        loadUrl(appendKioskToken("http://192.168.45.218:3001$pageRoute", storedToken))
                     }
                 }
             }
@@ -740,6 +777,11 @@ class WebViewFragment : Fragment() {
         )
     }
 
+    override fun onDestroyView() {
+        HidScannerCapture.stop()
+        super.onDestroyView()
+    }
+
     companion object {
         private const val ARG_ROUTE = "ARG_ROUTE"
         private const val ARG_IS_BOTTOM_MENU = "ARG_IS_BOTTOM_MENU"
@@ -755,6 +797,12 @@ class WebViewFragment : Fragment() {
     }
 }
 
+
+private fun appendKioskToken(url: String, token: String?): String {
+    if (token.isNullOrEmpty()) return url
+    val sep = if (url.contains('?')) '&' else '?'
+    return "$url${sep}token=${Uri.encode(token)}"
+}
 
 fun Modifier.runIf(
     condition: Boolean,

@@ -117,6 +117,20 @@ fun WebView.onKioskModeResult(activity: Activity, state: com.rawgraphy.blanc.uti
     }
 }
 
+fun WebView.onSerialPrintResult(activity: Activity, result: JsonObject) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onSerialPrintResult: $result")
+        this.loadUrl("javascript:onSerialPrintResult($result)")
+    }
+}
+
+fun WebView.onQrScanResult(activity: Activity, result: JsonObject) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onQrScanResult: $result")
+        this.loadUrl("javascript:onQrScanResult($result)")
+    }
+}
+
 fun WebView.onFcmTokenComplete(activity: Activity, fcmToken: String, udid: String) {
     activity.runOnUiThread {
         Log.d("WebAppInterface", "onFcmTokenComplete")

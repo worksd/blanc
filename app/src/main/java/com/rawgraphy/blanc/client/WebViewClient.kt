@@ -141,6 +141,30 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
+    fun requestSerialPrint(command: String) {
+        Log.d(TAG, "requestSerialPrint: $command")
+        receiver.requestSerialPrint(command)
+    }
+
+    @JavascriptInterface
+    fun startQrScan(command: String) {
+        Log.d(TAG, "startQrScan: $command")
+        receiver.startQrScan(command)
+    }
+
+    @JavascriptInterface
+    fun stopQrScan() {
+        Log.d(TAG, "stopQrScan")
+        receiver.stopQrScan()
+    }
+
+    @JavascriptInterface
+    fun saveKioskToken(token: String) {
+        Log.d(TAG, "saveKioskToken (len=${token.length})")
+        receiver.saveKioskToken(token)
+    }
+
+    @JavascriptInterface
     fun enterKioskMode() {
         Log.d(TAG, "enterKioskMode")
         receiver.enterKioskMode()
