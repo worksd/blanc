@@ -21,7 +21,7 @@ jobs:
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
       - name: Build Release APK
-        run: ./gradlew assembleRelease
+        run: ./gradlew assembleDefaultRelease
         env:
           KEYSTORE_PATH: keystore.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -33,5 +33,5 @@ jobs:
         with:
           appId: "1:1019972753125:android:14e7f86c214f734cf0260c"
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-          file: app/build/outputs/apk/release/app-release.apk
+          file: app/build/outputs/apk/default/release/app-default-release.apk
           groups: testers

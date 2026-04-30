@@ -24,6 +24,18 @@ android {
         vectorDrawables.useSupportLibrary = true
     }
 
+    flavorDimensions += "mode"
+    productFlavors {
+        create("default") {
+            dimension = "mode"
+            buildConfigField("String", "INITIAL_ROUTE", "\"/splash\"")
+        }
+        create("kiosk") {
+            dimension = "mode"
+            buildConfigField("String", "INITIAL_ROUTE", "\"/kiosk\"")
+        }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file(System.getenv("KEYSTORE_PATH") ?: "keystore.jks")
@@ -57,6 +69,7 @@ android {
     buildFeatures {
         compose = true
         viewBinding = true
+        buildConfig = true
     }
 
     packaging {
@@ -70,6 +83,9 @@ android {
 }
 
 dependencies {
+
+    // Centerm POS SDK (RS-232 프린터 제어)
+    implementation(files("libs/Pos_V1.0.1.9.jar"))
 
     // Compose (BOM 기반 버전 자동화)
     implementation(platform("androidx.compose:compose-bom:2024.05.00"))

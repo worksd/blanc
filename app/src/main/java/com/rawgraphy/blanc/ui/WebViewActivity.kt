@@ -2,7 +2,9 @@ package com.rawgraphy.blanc.ui
 
 import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.WindowManager
+import com.rawgraphy.blanc.payment.serial.HidScannerCapture
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -17,6 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import com.rawgraphy.blanc.BuildConfig
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.databinding.ActivityWebViewBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -39,8 +42,10 @@ class WebViewActivity : AppCompatActivity() {
 
     private fun initWebView(route: String?) {
         if (route.isNullOrEmpty()) {
-            loadSplashScreen()
-            loadWebViewFragment("/splash")
+            if (BuildConfig.FLAVOR == "default") {
+                loadSplashScreen()
+            }
+            loadWebViewFragment(BuildConfig.INITIAL_ROUTE)
             window.navigationBarColor = android.graphics.Color.parseColor("#000000")
         } else {
             loadWebViewFragment(route)
@@ -63,6 +68,11 @@ class WebViewActivity : AppCompatActivity() {
         binding.splashScreen.setContent {
             SplashScreen()
         }
+    }
+
+    override fun dispatchKeyEvent(event: KeyEvent): Boolean {
+        if (HidScannerCapture.dispatch(event)) return true
+        return super.dispatchKeyEvent(event)
     }
 }
 

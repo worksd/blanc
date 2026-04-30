@@ -6,6 +6,7 @@ import javax.inject.Inject
 
 const val FILE_NAME = "Rawgraphy"
 const val WebEndPointKey = "WebEndPointKey"
+const val KioskTokenKey = "KioskTokenKey"
 
 class PrefUtils @Inject constructor(
     val context: Context
