@@ -32,10 +32,11 @@ object KisRequest {
     fun toIntent(commandJson: String): Intent {
         val root = JsonParser.parseString(commandJson).asJsonObject
         val tranCode = root.get("inTranCode")?.takeIf { it.isJsonPrimitive }?.asString
+        val secondTranCode = root.get("inSecondTranCode")?.takeIf { it.isJsonPrimitive }?.asString
         val isPrintCommand = tranCode == "PR" || tranCode == "BP"
 
         if (!isPrintCommand) ensureCustomerUuid(root)
-        if (isPrintCommand) ensurePrintDefaults(root)
+        if (isPrintCommand) ensurePrintDefaults(root, tranCode, secondTranCode)
 
         val intent = Intent(KisConstants.AGENT_INTENT_ACTION).apply {
             setPackage(KisConstants.AGENT_PACKAGE)
@@ -53,10 +54,12 @@ object KisRequest {
                 prim.isBoolean -> intent.putExtra(key, prim.asBoolean)
                 prim.isNumber -> {
                     val n = prim.asNumber
-                    if (n.toLong().toDouble() == n.toDouble()) {
-                        intent.putExtra(key, n.toLong())
-                    } else {
-                        intent.putExtra(key, n.toDouble())
+                    val asLong = n.toLong()
+                    val isInteger = asLong.toDouble() == n.toDouble()
+                    when {
+                        !isInteger -> intent.putExtra(key, n.toDouble())
+                        asLong in Int.MIN_VALUE..Int.MAX_VALUE -> intent.putExtra(key, asLong.toInt())
+                        else -> intent.putExtra(key, asLong)
                     }
                 }
                 else -> intent.putExtra(key, prim.asString)
@@ -149,10 +152,22 @@ object KisRequest {
         }
     }
 
-    /** PR/BP 호출 시 샘플에서 항상 함께 보내는 필수 extras 기본값 주입. JS가 이미 보냈으면 보존. */
-    private fun ensurePrintDefaults(root: JsonObject) {
-        if (!root.has("inAutoCut")) root.addProperty("inAutoCut", true)
-        if (!root.has("inCuttingSet")) root.addProperty("inCuttingSet", 1)  // 0=Full, 1=Partial
+    /**
+     * 인쇄 명령(PR/BP) 모드별로 샘플이 함께 넘기는 필수 extras를 주입. JS가 명시했으면 보존.
+     *  - PR + "0" (센텀 내장):  inAutoCut, inCuttingSet, inConnectToCat
+     *  - PR + "1" (RS-232 외장): inPort, inBaud, inConnectToCat  ← 컷/cuttingSet 없음
+     *  - BP        (CBP2200) :  inAutoCut, inCuttingSet, inConnectToCat
+     */
+    private fun ensurePrintDefaults(root: JsonObject, tranCode: String?, secondTranCode: String?) {
         if (!root.has("inConnectToCat")) root.addProperty("inConnectToCat", false)
+
+        if (tranCode == "PR" && secondTranCode == "1") {
+            if (!root.has("inPort")) root.addProperty("inPort", 1)
+            if (!root.has("inBaud")) root.addProperty("inBaud", 9600)
+            return
+        }
+
+        if (!root.has("inAutoCut")) root.addProperty("inAutoCut", true)
+        if (!root.has("inCuttingSet")) root.addProperty("inCuttingSet", 1)
     }
 }
