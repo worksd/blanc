@@ -32,6 +32,7 @@ android {
         }
         create("kiosk") {
             dimension = "mode"
+            applicationIdSuffix = ".kiosk"
             buildConfigField("String", "INITIAL_ROUTE", "\"/kiosk\"")
         }
     }

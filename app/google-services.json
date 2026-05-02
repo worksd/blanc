@@ -26,9 +26,28 @@
     },
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1019972753125:android:3f67457e750bebbbf0260c",
+        "android_client_info": {
+          "package_name": "com.rawgraphy.blanc.kiosk"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBihjFnUb0GQeFZPoO9PjxyGSzSoXPvRHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1019972753125:android:f073caddd494ae7ff0260c",
         "android_client_info": {
-          "package_name": "com.rawgraphy.blanc"
+          "package_name": "com.worksd.blanc"
         }
       },
       "oauth_client": [],

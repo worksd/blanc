@@ -20,18 +20,26 @@ jobs:
       - name: Decode Keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > app/keystore.jks
 
-      - name: Build Release APK
-        run: ./gradlew assembleDefaultRelease
+      - name: Build Release APKs (default + kiosk)
+        run: ./gradlew assembleRelease
         env:
           KEYSTORE_PATH: keystore.jks
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
-      - name: Upload to Firebase App Distribution
+      - name: Upload default to Firebase App Distribution
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
           appId: "1:1019972753125:android:14e7f86c214f734cf0260c"
           serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           file: app/build/outputs/apk/default/release/app-default-release.apk
           groups: testers
+
+      - name: Upload kiosk to Firebase App Distribution
+        uses: wzieba/Firebase-Distribution-Github-Action@v1
+        with:
+          appId: ${{ secrets.FIREBASE_KIOSK_APP_ID }}
+          serviceCredentialsFileContent: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          file: app/build/outputs/apk/kiosk/release/app-kiosk-release.apk
+          groups: kiosk-testers
