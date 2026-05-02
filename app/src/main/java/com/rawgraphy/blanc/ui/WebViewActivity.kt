@@ -22,6 +22,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import com.rawgraphy.blanc.BuildConfig
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.databinding.ActivityWebViewBinding
+import com.rawgraphy.blanc.util.applyKioskImmersiveIfNeeded
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -34,6 +35,8 @@ class WebViewActivity : AppCompatActivity() {
 
         binding = ActivityWebViewBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        applyKioskImmersiveIfNeeded()
 
         val route = intent?.getStringExtra("route")
 

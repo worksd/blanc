@@ -20,6 +20,7 @@ import com.rawgraphy.blanc.data.BootInfoResponse
 import com.rawgraphy.blanc.data.BottomMenuResponse
 import com.rawgraphy.blanc.data.RouteInfo
 import com.rawgraphy.blanc.databinding.ActivityMainBinding
+import com.rawgraphy.blanc.util.applyKioskImmersiveIfNeeded
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -35,6 +36,8 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater, null, false)
         setContentView(binding.root)
+
+        applyKioskImmersiveIfNeeded()
 
         try {
             val bootInfo =
