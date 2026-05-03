@@ -66,10 +66,12 @@ import com.rawgraphy.blanc.client.onHideDialog
 import com.rawgraphy.blanc.client.onKakaoLoginSuccess
 import com.rawgraphy.blanc.client.onKioskModeResult
 import com.rawgraphy.blanc.client.onKisPaymentResult
+import com.rawgraphy.blanc.client.onKisTransactionQueryResult
 import com.rawgraphy.blanc.client.onPaymentSuccess
 import com.rawgraphy.blanc.client.onQrScanResult
 import com.rawgraphy.blanc.client.onSerialPrintResult
 import com.rawgraphy.blanc.payment.kis.KisAgentLauncher
+import com.rawgraphy.blanc.payment.kis.KisCatIdStore
 import com.rawgraphy.blanc.payment.serial.HidScannerCapture
 import com.rawgraphy.blanc.payment.serial.SerialPrinter
 import com.rawgraphy.blanc.data.GoogleLoginConfiguration
@@ -150,7 +152,21 @@ class WebViewFragment : Fragment() {
 
     private val kisAgentLauncher = KisAgentLauncher(this) { result ->
         if (!isAdded) return@KisAgentLauncher
+        captureCatId(result)
         binding.webView.onKisPaymentResult(requireActivity(), result)
+    }
+
+    private val kisQueryLauncher = KisAgentLauncher(this) { result ->
+        if (!isAdded) return@KisAgentLauncher
+        captureCatId(result)
+        binding.webView.onKisTransactionQueryResult(requireActivity(), result)
+    }
+
+    private fun captureCatId(result: com.google.gson.JsonObject) {
+        val catId = result.get("outCatId")?.takeIf { it.isJsonPrimitive }?.asString
+        if (!catId.isNullOrBlank()) {
+            KisCatIdStore.save(requireContext().applicationContext, catId)
+        }
     }
 
     override fun onCreateView(
@@ -550,6 +566,19 @@ class WebViewFragment : Fragment() {
                                 kisAgentLauncher.launch(command)
                             }
 
+                            override fun queryKisTransaction(uuid: String) {
+                                if (!isAdded) return
+                                val ctx = requireContext().applicationContext
+                                // 캐시된 값 우선, 없으면 하드코딩 폴백 (현 단말 TID 고정)
+                                val catId = KisCatIdStore.get(ctx) ?: DEFAULT_CAT_ID
+                                val command = com.google.gson.JsonObject().apply {
+                                    addProperty("inTranCode", "ST")
+                                    addProperty("inCustomerUuid", uuid)
+                                    addProperty("inCatId", catId)
+                                }.toString()
+                                kisQueryLauncher.launch(command)
+                            }
+
                             override fun requestSerialPrint(command: String) {
                                 if (!isAdded) return
                                 SerialPrinter.print(command) { result ->
@@ -651,7 +680,8 @@ class WebViewFragment : Fragment() {
                         webViewClient = customWebViewClient
                         val storedToken = PrefUtils(requireContext().applicationContext)
                             .getString(KioskTokenKey)
-                        loadUrl(appendKioskToken(KloudWebUrlProvider.getUrl(requireContext(), pageRoute), storedToken))
+//                        loadUrl(appendKioskToken(KloudWebUrlProvider.getUrl(requireContext(), pageRoute), storedToken))
+                        loadUrl(appendKioskToken("http://192.168.0.29:3001$pageRoute", storedToken))
                     }
                 }
             }
@@ -782,6 +812,9 @@ class WebViewFragment : Fragment() {
     }
 
     companion object {
+        // 단말 catId 하드코딩 — 캐시 미스 시 폴백. 단말 교체/펌웨어 재설정 시 갱신 필요.
+        private const val DEFAULT_CAT_ID = "90100546"
+
         private const val ARG_ROUTE = "ARG_ROUTE"
         private const val ARG_IS_BOTTOM_MENU = "ARG_IS_BOTTOM_MENU"
         fun newInstance(

@@ -141,6 +141,12 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
+    fun queryKisTransaction(uuid: String) {
+        Log.d(TAG, "queryKisTransaction: uuid=$uuid")
+        receiver.queryKisTransaction(uuid)
+    }
+
+    @JavascriptInterface
     fun requestSerialPrint(command: String) {
         Log.d(TAG, "requestSerialPrint: $command")
         receiver.requestSerialPrint(command)

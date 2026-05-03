@@ -109,6 +109,13 @@ fun WebView.onKisPaymentResult(activity: Activity, result: JsonObject) {
     }
 }
 
+fun WebView.onKisTransactionQueryResult(activity: Activity, result: JsonObject) {
+    activity.runOnUiThread {
+        Log.d("WebAppInterface", "onKisTransactionQueryResult: $result")
+        this.loadUrl("javascript:onKisTransactionQueryResult($result)")
+    }
+}
+
 fun WebView.onKioskModeResult(activity: Activity, state: com.rawgraphy.blanc.util.KioskState) {
     activity.runOnUiThread {
         val json = Gson().toJson(state)

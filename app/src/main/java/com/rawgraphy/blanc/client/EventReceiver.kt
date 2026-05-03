@@ -18,6 +18,7 @@ interface EventReceiver {
     fun showDialog(dialogInfo: KloudDialogInfo)
     fun requestPayment(command: String)
     fun requestKisPayment(command: String)
+    fun queryKisTransaction(uuid: String)
     fun requestSerialPrint(command: String)
     fun startQrScan(command: String)
     fun stopQrScan()
