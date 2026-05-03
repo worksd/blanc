@@ -680,8 +680,7 @@ class WebViewFragment : Fragment() {
                         webViewClient = customWebViewClient
                         val storedToken = PrefUtils(requireContext().applicationContext)
                             .getString(KioskTokenKey)
-//                        loadUrl(appendKioskToken(KloudWebUrlProvider.getUrl(requireContext(), pageRoute), storedToken))
-                        loadUrl(appendKioskToken("http://192.168.0.29:3001$pageRoute", storedToken))
+                        loadUrl(appendKioskToken(KloudWebUrlProvider.getUrl(requireContext(), pageRoute), storedToken))
                     }
                 }
             }
