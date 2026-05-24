@@ -11,6 +11,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.rawgraphy.blanc.R
 import com.rawgraphy.blanc.ui.WebViewActivity
+import com.rawgraphy.blanc.util.fcmTokenRefresh
 import com.rawgraphy.blanc.util.refreshWebView
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -26,6 +27,9 @@ class FirebaseMessaging : FirebaseMessagingService() {
         super.onNewToken(token)
 
         Log.d("FirebaseMessaging", "New Token: $token")
+        serviceScope.launch {
+            fcmTokenRefresh.emit(token)
+        }
     }
 
     override fun onMessageReceived(message: RemoteMessage) {

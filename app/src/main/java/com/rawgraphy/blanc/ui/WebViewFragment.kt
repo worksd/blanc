@@ -60,7 +60,7 @@ import com.rawgraphy.blanc.client.WebViewListener
 import com.rawgraphy.blanc.client.onCameraPermissionResult
 import com.rawgraphy.blanc.client.onDialogConfirm
 import com.rawgraphy.blanc.client.onErrorInvoked
-import com.rawgraphy.blanc.client.onFcmTokenComplete
+import com.rawgraphy.blanc.client.onFcmTokenReceived
 import com.rawgraphy.blanc.client.onGoogleLoginSuccess
 import com.rawgraphy.blanc.client.onHideDialog
 import com.rawgraphy.blanc.client.onKakaoLoginSuccess
@@ -84,6 +84,7 @@ import com.rawgraphy.blanc.util.KloudWebUrlProvider
 import com.rawgraphy.blanc.util.KioskTokenKey
 import com.rawgraphy.blanc.util.PrefUtils
 import com.rawgraphy.blanc.util.WebEndPointKey
+import com.rawgraphy.blanc.util.fcmTokenRefresh
 import com.rawgraphy.blanc.util.getInstallationId
 import com.rawgraphy.blanc.util.refreshWebView
 import dagger.hilt.android.AndroidEntryPoint
@@ -208,6 +209,7 @@ class WebViewFragment : Fragment() {
         )
         collectRefreshEvent(route)
         collectViewModelRefreshEvent(route)
+        collectFcmTokenRefreshEvent()
 
         initSafeArea(ignoreSafeArea)
 
@@ -368,6 +370,20 @@ class WebViewFragment : Fragment() {
                     binding.webView.reload()
                     Log.d("FirebaseMessaging", "collectRefreshEvent: $route")
                 }
+            }
+        }
+    }
+
+    private fun collectFcmTokenRefreshEvent() {
+        lifecycleScope.launch {
+            fcmTokenRefresh.collect { token ->
+                if (!isAdded) return@collect
+                binding.webView.onFcmTokenReceived(
+                    requireActivity(),
+                    fcmToken = token,
+                    udid = getInstallationId(requireContext()),
+                )
+                Log.d("FirebaseMessaging", "collectFcmTokenRefreshEvent")
             }
         }
     }
@@ -634,10 +650,10 @@ class WebViewFragment : Fragment() {
                                                 return@OnCompleteListener
                                             }
                                             val token = task.result
-                                            binding.webView.onFcmTokenComplete(
+                                            binding.webView.onFcmTokenReceived(
                                                 requireActivity(),
                                                 fcmToken = token,
-                                                udid = "",
+                                                udid = getInstallationId(requireContext()),
                                             )
                                         })
                                 } catch (e: Exception) {

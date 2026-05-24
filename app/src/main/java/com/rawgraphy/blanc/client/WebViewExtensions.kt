@@ -138,12 +138,12 @@ fun WebView.onQrScanResult(activity: Activity, result: JsonObject) {
     }
 }
 
-fun WebView.onFcmTokenComplete(activity: Activity, fcmToken: String, udid: String) {
+fun WebView.onFcmTokenReceived(activity: Activity, fcmToken: String, udid: String) {
     activity.runOnUiThread {
-        Log.d("WebAppInterface", "onFcmTokenComplete")
+        Log.d("WebAppInterface", "onFcmTokenReceived")
         this.loadUrl(
             createJavaScriptFunction(
-                "onFcmTokenComplete",
+                "onFcmTokenReceived",
                 mapOf("fcmToken" to fcmToken, "udid" to udid)
             )
         )

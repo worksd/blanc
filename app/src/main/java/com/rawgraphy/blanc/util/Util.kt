@@ -6,6 +6,8 @@ import java.util.UUID
 
 val refreshWebView: MutableSharedFlow<List<String>> = MutableSharedFlow()
 
+val fcmTokenRefresh: MutableSharedFlow<String> = MutableSharedFlow()
+
 fun getInstallationId(context: Context): String {
     val pref = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
     val key = "installation_id"

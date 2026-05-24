@@ -183,7 +183,7 @@ class WebAppInterface(val receiver: EventReceiver) {
     }
 
     @JavascriptInterface
-    fun registerDevice() {
+    fun requestFcmToken() {
         receiver.sendFcmToken()
     }
 
