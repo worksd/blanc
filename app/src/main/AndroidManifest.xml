@@ -108,6 +108,7 @@
             android:theme="@style/Theme.Blanc"
             android:launchMode="singleTask">
 
+            <!-- ① App Links (https) : iOS 유니버설 링크에 해당 -->
             <intent-filter android:autoVerify="true">  <!-- 자동 인증 추가 -->
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
@@ -119,6 +120,15 @@
                 <data android:host="staging.rawgraphy.com"/>
                 <data android:host="www.staging.rawgraphy.com"/>
                 <data android:pathPrefix="/"/>
+            </intent-filter>
+
+            <!-- ② 커스텀 스킴 : iOS onOpenURL(rawgraphy://)에 해당 -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="rawgraphy"/>
             </intent-filter>
 
         </activity>

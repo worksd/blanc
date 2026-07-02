@@ -39,6 +39,9 @@ class MainActivity : AppCompatActivity() {
 
         applyKioskImmersiveIfNeeded()
 
+        // 딥링크 콜드 스타트 (iOS onCreate). 딥링크로 진입한 경우 bootInfo 처리 없이 종료.
+        if (handleDeepLink(intent)) return
+
         try {
             val bootInfo =
                 Gson().fromJson(intent.getStringExtra("bootInfo"), BootInfoResponse::class.java)
@@ -62,11 +65,57 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onNewIntent(intent: Intent) {
+    override fun onNewIntent(intent: Intent) {   // 앱이 떠 있을 때 (iOS 웜 케이스)
         super.onNewIntent(intent)
-        val path = intent.data?.pathSegments?.joinToString("/", prefix = "/").toString()
-        navigate(path)
+        setIntent(intent)
+        handleDeepLink(intent)
     }
+
+    /**
+     * iOS handleDeepLink와 동일 로직.
+     * https / rawgraphy:// 모두에서 원본 path(+query)를 복원해
+     * /splash?link=<encoded> 를 WebViewActivity route로 전달한다.
+     * @return 딥링크를 처리했으면 true.
+     */
+    private fun handleDeepLink(intent: Intent?): Boolean {
+        val uri = intent?.data ?: return false
+        Log.d("deeplink", "incoming uri=$uri")
+
+        // https://.../redirect → /redirect,  rawgraphy://redirect → /redirect
+        val path = if (uri.scheme == "https" || uri.scheme == "http") {
+            uri.encodedPath ?: ""                                  // iOS url.path
+        } else {
+            "/" + (uri.host ?: "") + (uri.encodedPath ?: "")       // 커스텀 스킴: host가 첫 세그먼트
+        }
+        // encodedQuery(원본 미디코드) 사용 → iOS url.query와 패리티
+        val full = if (!uri.encodedQuery.isNullOrEmpty()) "$path?${uri.encodedQuery}" else path
+
+        if (full.length <= 1) {
+            navigate("/splash")
+            return true
+        }
+
+        val encodedLink = percentEncodeAlnumOnly(full)             // iOS .alphanumerics와 동일
+        val target = "/splash?link=$encodedLink"
+        Log.d("deeplink", "navigate $target")
+        navigate(target)
+        return true
+    }
+
+    // iOS: path.addingPercentEncoding(withAllowedCharacters: .alphanumerics)
+    // → 영숫자 외 전부 %XX (UTF-8 바이트 단위). Uri.encode()는 허용 문자가 달라 쓰지 않는다.
+    private fun percentEncodeAlnumOnly(s: String): String =
+        buildString {
+            for (b in s.toByteArray(Charsets.UTF_8)) {
+                val c = b.toInt() and 0xFF
+                val ch = c.toChar()
+                if (ch in 'A'..'Z' || ch in 'a'..'z' || ch in '0'..'9') {
+                    append(ch)
+                } else {
+                    append("%%%02X".format(c))
+                }
+            }
+        }
 
     private fun navigate(route: String) {
         val intent = Intent(this, WebViewActivity::class.java)
