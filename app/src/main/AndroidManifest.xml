@@ -117,8 +117,6 @@
                 <data android:scheme="https"/>
                 <data android:host="rawgraphy.com"/>
                 <data android:host="www.rawgraphy.com"/>
-                <data android:host="staging.rawgraphy.com"/>
-                <data android:host="www.staging.rawgraphy.com"/>
                 <data android:pathPrefix="/"/>
             </intent-filter>
 
